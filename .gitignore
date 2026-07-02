@@ -1,0 +1,6 @@
+node_modules/
+.env
+saas.db
+saas.db-journal
+*.db
+*.log
