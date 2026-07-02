@@ -41,10 +41,69 @@ db.serialize(() => {
       user_id INTEGER UNIQUE NOT NULL,
       slug TEXT UNIQUE NOT NULL,
       name TEXT NOT NULL,
+      address TEXT DEFAULT '',
+      whatsapp_number TEXT DEFAULT '',
+      instagram_url TEXT DEFAULT '',
+      logo_url TEXT DEFAULT '',
+      cover_url TEXT DEFAULT '',
+      delivery_fee INTEGER DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
     )
   `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS categories (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      store_id INTEGER NOT NULL,
+      name TEXT NOT NULL,
+      order_index INTEGER DEFAULT 0,
+      FOREIGN KEY(store_id) REFERENCES stores(id) ON DELETE CASCADE
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS products (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      store_id INTEGER NOT NULL,
+      category_id INTEGER,
+      name TEXT NOT NULL,
+      description TEXT DEFAULT '',
+      image_url TEXT DEFAULT '',
+      price INTEGER NOT NULL DEFAULT 0,
+      original_price INTEGER DEFAULT NULL,
+      has_discount INTEGER DEFAULT 0,
+      variants_json TEXT DEFAULT NULL,
+      is_disabled INTEGER DEFAULT 0,
+      FOREIGN KEY(store_id) REFERENCES stores(id) ON DELETE CASCADE,
+      FOREIGN KEY(category_id) REFERENCES categories(id) ON DELETE SET NULL
+    )
+  `);
+
+  // Seed data for demo store 'mi-tienda' (only if it doesn't exist)
+  db.run(`INSERT OR IGNORE INTO users (id, email, password_hash, tier) VALUES (999, 'demo@mi-tienda.com', '$2a$10$demohashdemohashdemohashdemohashdemohashdemohashdemo', 'standard')`);
+
+  db.run(`INSERT OR IGNORE INTO stores (id, user_id, slug, name, address, whatsapp_number, instagram_url, delivery_fee)
+    VALUES (999, 999, 'mi-tienda', 'Mi Tienda Demo', 'Av. Corrientes 1234, CABA', '5491124091027', 'https://instagram.com/yamenu.online', 500)`);
+
+  db.run(`INSERT OR IGNORE INTO categories (id, store_id, name, order_index) VALUES (1, 999, 'Burgers', 0)`);
+  db.run(`INSERT OR IGNORE INTO categories (id, store_id, name, order_index) VALUES (2, 999, 'Bebidas', 1)`);
+
+  db.run(`INSERT OR IGNORE INTO products (id, store_id, category_id, name, description, image_url, price, original_price, has_discount, variants_json, is_disabled)
+    VALUES (1, 999, 1, 'Cheeseburger', 'Medallón blend premium 120g x2, cheddar milkaut x6 & salsa secret y pan de papa',
+      'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2Fd416b7eb-a8ef-4101-bb92-8af3888c7dbc_500x500?alt=media',
+      1600, 2000, 1, '[{"name":"Simple","price":1600},{"name":"Doble","price":1900}]', 0)`);
+
+  db.run(`INSERT OR IGNORE INTO products (id, store_id, category_id, name, description, image_url, price, original_price, has_discount, variants_json, is_disabled)
+    VALUES (2, 999, 1, 'American Burger', 'Medallón blend premium 120g x2, cheddar milkaut x4, lechuga, tomate & Utah Fry Sauce',
+      'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2Fa23b0b08-c559-4e2a-92f1-0b8af3c2014d_500x500?alt=media',
+      1600, NULL, 0, '[{"name":"Simple","price":1600},{"name":"Doble","price":1900}]', 0)`);
+
+  db.run(`INSERT OR IGNORE INTO products (id, store_id, category_id, name, description, image_url, price, original_price, has_discount, variants_json, is_disabled)
+    VALUES (3, 999, 2, 'Coca 1.5L', '',
+      'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2Ffa781025-492d-465d-bfc2-332c9b40a32d_500x500?alt=media',
+      450, NULL, 0, NULL, 0)`);
+
   console.log('Database tables initialized.');
 });
 
@@ -236,6 +295,53 @@ app.get('/api/dashboard/summary', (req, res) => {
       orders: 0,
       revenue: 0
     }
+  });
+});
+
+// Public store page route — must be BEFORE static middleware
+app.get('/s/:slug', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Public store API — returns store data, categories, and products
+app.get('/api/public/store/:slug', (req, res) => {
+  const { slug } = req.params;
+
+  db.get('SELECT * FROM stores WHERE slug = ?', [slug], (err, store) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    if (!store) {
+      return res.status(404).json({ error: 'Store not found' });
+    }
+
+    db.all(
+      'SELECT * FROM categories WHERE store_id = ? ORDER BY order_index ASC',
+      [store.id],
+      (err, categories) => {
+        if (err) {
+          return res.status(500).json({ error: err.message });
+        }
+
+        db.all(
+          'SELECT * FROM products WHERE store_id = ? AND is_disabled = 0',
+          [store.id],
+          (err, products) => {
+            if (err) {
+              return res.status(500).json({ error: err.message });
+            }
+
+            // Parse variants_json for each product
+            const parsedProducts = products.map(p => ({
+              ...p,
+              variants: p.variants_json ? JSON.parse(p.variants_json) : []
+            }));
+
+            return res.json({ store, categories, products: parsedProducts });
+          }
+        );
+      }
+    );
   });
 });
 

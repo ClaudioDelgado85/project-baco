@@ -1,31 +1,5 @@
-// ===== DATA =====
-const products = {
-    cheeseburger: { name: 'Cheeseburger', desc: 'Medallón blend premium 120g x2, cheddar milkaut x6 & salsa secret y pan de papa', img: 'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2Fd416b7eb-a8ef-4101-bb92-8af3888c7dbc_500x500?alt=media', price: 1600, originalPrice: 2000, discount: true, variants: [{name:'Simple', price:1600}, {name:'Doble', price:1900}] },
-    american: { name: 'American Burger', desc: 'Medallón blend premium 120g x2, cheddar milkaut x4, lechuga, tomate & Utah Fry Sauce', img: 'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2Fa23b0b08-c559-4e2a-92f1-0b8af3c2014d_500x500?alt=media', price: 1600, variants: [{name:'Simple', price:1600}, {name:'Doble', price:1900}] },
-    crispy: { name: 'Crispy Burger', desc: 'Medallón blend premium 120g x2, cheddar milkaut x4, bacon alioli & cebolla crispy', img: 'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2F54978726-c181-417f-bc93-a2ac431b6b2f_500x500?alt=media', price: 1730, variants: [{name:'Simple', price:1730}, {name:'Doble', price:2030}] },
-    bacon: { name: 'Bacon Burger', desc: 'Medallón blend premium 120g x2, cheddar milkaut x4, pan de papa, tira bacon crujiente x2 & salsa secret', img: 'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2F2d0d26bd-f29c-491b-92e1-6ac7c3f9e747_500x500?alt=media', price: 1630, disabled: true, variants: [{name:'Simple', price:1630}, {name:'Doble', price:1930}] },
-    lomo: { name: 'Sanguche de Lomo Saltado', desc: 'Lomo saltado y flameado con ingredientes selectos, cebolla tomate salsa especial sobre una cama de queso y lechuga', img: 'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2F34446081-88f5-4666-805e-bf36ddae3667_500x500?alt=media', price: 8990, originalPrice: 11237, discount: true },
-    chicharron: { name: 'Sanguche de Chicharrón Peruano', desc: 'Trozos de cerdo frito con dedicación equilibrando perfectamente la cebolla y tomate con camote', img: 'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2Ff73c0145-b15e-4563-93cf-ac25e07d4e41_500x500?alt=media', price: 8990 },
-    pollo: { name: 'Sanguche de Pollo Deshilachado', desc: 'Delicioso pollo, queso, huevo frito, tocino y palta!', img: 'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2F274ff7cc-9709-429b-af79-d7547d57c916_500x500?alt=media', price: 6990 },
-    salmon: { name: 'Sanguche de Salmón', desc: 'Sanguche que fusiona tradición japonesa y sabor peruano frito al panko sobre una sabrosa tartara', img: 'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2Fd4ec9a08-39b8-4601-baa2-f5ac021e1b1e_500x500?alt=media', price: 9990 },
-    brasa: { name: 'Sanguche de Pollo a la Brasa', desc: 'Pollo a la brasa con lechuga tomate y salsa de la casa', img: 'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2F4a7a9d54-61bd-49a0-82f6-51036d9f55d3_500x500?alt=media', price: 7990 },
-    chaufa: { name: 'Arroz Chaufa', desc: '(Pollo, carne o vegetales) Arroz frito salteado al wok cebollín y huevo', img: 'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2F34036568-682f-4144-bf50-b4e2e45b3809_500x500?alt=media', price: 6500 },
-    fetuccini: { name: 'Fetuccini con Lomo Saltado', desc: 'Fetuccini a la huancaína con lomito saltado jugoso flameado', img: 'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2F89a89096-fb9c-4c3d-9e2a-c0f2638c2d5c_500x500?alt=media', price: 9500 },
-    chicharron_pollo: { name: 'Chicharrón de Pollo', desc: 'Pollo empanizado y crocante con papas fritas', img: 'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2Ffaed2ca3-7934-46e5-88f7-d5a8c20b578f_500x500?alt=media', price: 7500 },
-    lomo_saltado: { name: 'Lomo Saltado', desc: 'Deliciosos trozos de lomo flameados, tomate, cebolla, papas fritas, arroz', img: 'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2F687d98bd-9e37-478e-bc55-e0d2e5c91d68_500x500?alt=media', price: 8500 },
-    muzzarella: { name: 'Pizza Muzzarella', desc: 'Mozzarella, salsa de tomate, orégano y aceitunas verdes.', img: 'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2F611ab50a-0f1b-4145-8943-f6d2e4929b20_500x500?alt=media', price: 980, variants: [{name:'Individual', price:980}, {name:'Grande', price:1900}] },
-    jamon: { name: 'Pizza de Jamón y Mozzarella', desc: 'Mozzarella, salsa de tomate, jamón cocido en dados, orégano y aceitunas', img: 'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2F8efd63bc-e99a-4fc0-a9c1-cba111a7bf08_500x500?alt=media', price: 980, variants: [{name:'Individual', price:980}, {name:'Grande', price:1900}] },
-    anchoas: { name: 'Pizza de Mozzarella y Anchoas', desc: 'Mozzarella, salsa de tomate, anchoas, orégano y aceitunas verdes.', img: 'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2Fb2123ab1-5de1-4fdf-8990-e0a8a505ee93_500x500?alt=media', price: 1200, variants: [{name:'Individual', price:1200}, {name:'Grande', price:2300}] },
-    fugazza: { name: 'Pizza Fugazza', desc: 'Cebolla, aceite de oliva, parmesano en hebras, orégano y aceitunas negras.', img: 'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2F67587eb9-ac36-4e56-99f0-98b2c2a1001a_500x500?alt=media', price: 1400, variants: [{name:'Individual', price:1400}, {name:'Grande', price:2500}] },
-    emp_jamon: { name: 'Empanada de Jamón y Queso', desc: 'Mozzarella y jamón cortado en dados', img: 'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2F5caf8079-e5c6-40bd-a0c6-975648e04b08_500x500?alt=media', price: 450 },
-    emp_pollo: { name: 'Empanada de Pollo', desc: 'Pollo, cebolla, pimientos rojos, cebolla de verdeo y huevo duro', img: 'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2Fb88a9199-f85c-43c8-9d50-b0fa090539ca_500x500?alt=media', price: 380 },
-    emp_carne: { name: 'Empanada de Carne', desc: 'Carne picada, cebolla, cebolla de verdeo, pimientos rojos, huevo duro y salsa', img: 'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2Fb5feae87-29a7-4542-ad36-3a7db8542157_500x500?alt=media', price: 380 },
-    emp_mostaza: { name: 'Empanada Abierta de Jamón a la Mostaza', desc: 'Mozzarella, cebolla salteada con mostaza, jamón cocido y huevo duro.', img: 'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2Fed6528e9-6a6a-41cf-bda7-1aeacd62350b_500x500?alt=media', price: 400 },
-    coca_15: { name: 'Coca 1.5L', desc: '', img: 'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2Ffa781025-492d-465d-bfc2-332c9b40a32d_500x500?alt=media', price: 450 },
-    sprite_15: { name: 'Sprite 1.5L', desc: '', img: 'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2F8ea9b527-9541-4f2f-becb-ece644b32c99_500x500?alt=media', price: 450 },
-    coca_500: { name: 'Coca 500ml', desc: '', img: 'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2F79029085-c734-435a-859c-78ace6e37479_500x500?alt=media', price: 300 },
-    sprite_500: { name: 'Sprite 500ml', desc: '', img: 'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2Fa70ae484-d193-4e31-978e-9a723e605dba_500x500?alt=media', price: 350 }
-};
+// ===== STORE DATA =====
+let storeData = null;
 
 let cart = [];
 let currentProduct = null;
@@ -34,7 +8,156 @@ let modalQty = 1;
 let selectedExtras = [];
 let orderType = 'delivery';
 let paymentMethod = 'efectivo';
-const DELIVERY_FEE = 100;
+
+// ===== STORE INIT =====
+async function initStore() {
+    const pathParts = window.location.pathname.split('/');
+    const slug = pathParts[2]; // /s/:slug → index 2
+
+    if (!slug) {
+        document.body.innerHTML = '<div style="padding:2rem;text-align:center;"><h2>Tienda no encontrada</h2><p>El enlace que ingresaste no corresponde a ninguna tienda.</p></div>';
+        return;
+    }
+
+    const skeleton = document.getElementById('loading-skeleton');
+
+    try {
+        const res = await fetch(`/api/public/store/${slug}`);
+        if (!res.ok) {
+            throw new Error('Store not found');
+        }
+        const data = await res.json();
+        storeData = data;
+
+        renderStoreProfile(data.store);
+        renderCategories(data.categories);
+        renderProducts(data.categories, data.products);
+
+        if (skeleton) skeleton.style.display = 'none';
+
+        // Re-attach IntersectionObserver after dynamic render
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
+                    const activePill = document.querySelector(`[data-cat="cat-${entry.target.dataset.catId}"]`);
+                    if (activePill) activePill.classList.add('active');
+                }
+            });
+        }, { threshold: 0.3 });
+        document.querySelectorAll('section[data-cat-id]').forEach(s => observer.observe(s));
+
+    } catch (err) {
+        if (skeleton) skeleton.style.display = 'none';
+        document.body.innerHTML = '<div style="padding:2rem;text-align:center;font-family:sans-serif;"><h2>Tienda no encontrada</h2><p>El enlace que ingresaste no corresponde a ninguna tienda disponible.</p></div>';
+    }
+}
+
+// ===== RENDER STORE PROFILE =====
+function renderStoreProfile(store) {
+    const heroImage = document.getElementById('heroImage');
+    if (heroImage) {
+        heroImage.src = store.cover_url || store.logo_url || heroImage.src;
+    }
+
+    const profileName = document.querySelector('.profile-name');
+    if (profileName) profileName.textContent = store.name || '';
+
+    const profileAddress = document.querySelector('.profile-address');
+    if (profileAddress) {
+        profileAddress.innerHTML = `
+            <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            ${store.address || ''}
+        `;
+    }
+
+    const deliveryPrice = document.querySelector('.delivery-price');
+    if (deliveryPrice) {
+        deliveryPrice.textContent = store.delivery_fee ? '$' + store.delivery_fee.toLocaleString() : 'Gratis';
+    }
+
+    const whatsappBtn = document.querySelector('.action-btn.primary');
+    if (whatsappBtn && store.whatsapp_number) {
+        whatsappBtn.href = `https://api.whatsapp.com/send?phone=${store.whatsapp_number}`;
+    }
+
+    const instagramBtn = document.querySelector('.action-btn.secondary');
+    if (instagramBtn && store.instagram_url) {
+        instagramBtn.href = store.instagram_url;
+    }
+}
+
+// ===== RENDER CATEGORIES =====
+function renderCategories(categories) {
+    const scroll = document.querySelector('.category-scroll');
+    if (!scroll) return;
+
+    scroll.innerHTML = categories.map((cat, i) => `
+        <button class="category-pill ${i === 0 ? 'active' : ''}" data-cat="cat-${cat.id}" onclick="scrollToCategory('cat-${cat.id}')">${cat.name}</button>
+    `).join('');
+}
+
+// ===== RENDER PRODUCTS =====
+function renderProducts(categories, products) {
+    const container = document.getElementById('products-container');
+    if (!container) return;
+
+    container.innerHTML = categories.map(cat => {
+        const catProducts = products.filter(p => p.category_id === cat.id);
+        if (catProducts.length === 0) return '';
+
+        return `
+            <section id="cat-${cat.id}" data-cat-id="${cat.id}">
+                <h2 class="section-title">${cat.name}</h2>
+                <div class="products-grid">
+                    ${catProducts.map((p, idx) => renderProductCard(p, idx)).join('')}
+                </div>
+            </section>
+        `;
+    }).join('');
+}
+
+function renderProductCard(p, idx) {
+    const stagger = (idx % 4) + 1;
+    const disabledClass = p.is_disabled ? ' disabled' : '';
+    const onClickAttr = p.is_disabled ? 'onclick="event.preventDefault()"' : `onclick="openProductModal(${p.id})"`;
+
+    const discountBadge = p.has_discount ? `<span class="discount-badge">OFERTA</span>` : '';
+
+    const variantsRow = p.variants && p.variants.length > 0
+        ? `<div class="variants-row">${p.variants.map(v => `<span class="variant-chip">${v.name} <strong>$${v.price.toLocaleString()}</strong></span>`).join('')}</div>`
+        : '';
+
+    const priceBlock = p.has_discount && p.original_price
+        ? `<div class="price-block"><span class="price-original">$${p.original_price.toLocaleString()}</span><span class="price-current">$${p.price.toLocaleString()}</span></div>`
+        : `<span class="price-current dark">$${p.price.toLocaleString()}</span>`;
+
+    const addButton = p.is_disabled
+        ? `<span class="out-of-stock">Sin stock</span>`
+        : `<button class="add-btn" onclick="event.stopPropagation(); quickAdd(${p.id})"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>`;
+
+    const imageStyle = p.is_disabled ? ' style="filter: grayscale(0.6);"' : '';
+
+    return `
+        <div class="product-card${disabledClass} fade-in stagger-${stagger}" ${onClickAttr}>
+            <div class="product-image-wrap">
+                <img src="${p.image_url || ''}" alt="${p.name}" class="product-image"${imageStyle}>
+                ${discountBadge}
+            </div>
+            <div class="product-info">
+                <div>
+                    <h3 class="product-name">${p.name}</h3>
+                    ${p.description ? `<p class="product-desc">${p.description}</p>` : ''}
+                    ${variantsRow}
+                </div>
+                <div class="product-footer">
+                    ${priceBlock}
+                    ${addButton}
+                </div>
+            </div>
+        </div>
+    `;
+}
 
 // ===== STATUS =====
 function checkStatus() {
@@ -70,34 +193,21 @@ function scrollToCategory(cat) {
     if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// Intersection Observer for active category
-document.addEventListener('DOMContentLoaded', () => {
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
-                const activePill = document.querySelector(`[data-cat="${entry.target.id}"]`);
-                if (activePill) activePill.classList.add('active');
-            }
-        });
-    }, { threshold: 0.3 });
-    document.querySelectorAll('section[id]').forEach(s => observer.observe(s));
-});
-
 // ===== MODAL =====
 function openProductModal(id) {
-    const p = products[id];
+    if (!storeData) return;
+    const p = storeData.products.find(prod => prod.id === id);
     if (!p) return;
-    currentProduct = { ...p, id };
+    currentProduct = { ...p };
     currentVariant = 0;
     modalQty = 1;
     selectedExtras = [];
 
-    document.getElementById('modalImage').src = p.img;
+    document.getElementById('modalImage').src = p.image_url || '';
     document.getElementById('modalImage').alt = p.name;
     document.getElementById('modalTitle').textContent = p.name;
-    document.getElementById('modalDesc').textContent = p.desc;
-    document.getElementById('modalDiscount').style.display = p.discount ? 'block' : 'none';
+    document.getElementById('modalDesc').textContent = p.description || '';
+    document.getElementById('modalDiscount').style.display = p.has_discount ? 'block' : 'none';
 
     // Variants
     const variantContainer = document.getElementById('variantOptions');
@@ -178,7 +288,7 @@ function addToCart() {
         id: currentProduct.id + '_' + Date.now(),
         productId: currentProduct.id,
         name: currentProduct.name,
-        img: currentProduct.img,
+        img: currentProduct.image_url || '',
         variant: variantName,
         extras: [...selectedExtras],
         price: price + extrasTotal,
@@ -191,7 +301,8 @@ function addToCart() {
 }
 
 function quickAdd(id) {
-    const p = products[id];
+    if (!storeData) return;
+    const p = storeData.products.find(prod => prod.id === id);
     if (!p) return;
     let price = p.price;
     let variantName = '';
@@ -203,7 +314,7 @@ function quickAdd(id) {
         id: id + '_' + Date.now(),
         productId: id,
         name: p.name,
-        img: p.img,
+        img: p.image_url || '',
         variant: variantName,
         extras: [],
         price: price,
@@ -245,8 +356,9 @@ function updateCart() {
     const deliveryCost = document.getElementById('deliveryCost');
     if (!itemsContainer || !emptyState || !footer) return;
 
-    // Update delivery cost based on order type
-    const delivery = orderType === 'delivery' ? DELIVERY_FEE : 0;
+    // Get delivery fee from store data or default to 0
+    const deliveryFee = (storeData && storeData.store && storeData.store.delivery_fee) ? storeData.store.delivery_fee : 0;
+    const delivery = orderType === 'delivery' ? deliveryFee : 0;
     if (deliveryRow) deliveryRow.style.display = orderType === 'delivery' ? 'flex' : 'none';
     if (deliveryCost) deliveryCost.textContent = '$' + delivery;
 
@@ -318,10 +430,11 @@ function setOrderType(type, el) {
 
     const addressGroup = document.getElementById('addressGroup');
     const deliveryCost = document.getElementById('deliveryCost');
+    const deliveryFee = (storeData && storeData.store && storeData.store.delivery_fee) ? storeData.store.delivery_fee : 0;
 
     if (type === 'delivery') {
         addressGroup.style.display = 'block';
-        if (deliveryCost) deliveryCost.textContent = '$' + DELIVERY_FEE;
+        if (deliveryCost) deliveryCost.textContent = '$' + deliveryFee;
     } else {
         addressGroup.style.display = 'none';
         if (deliveryCost) deliveryCost.textContent = '$0';
@@ -358,7 +471,8 @@ function sendOrder() {
         total += item.price * item.qty;
     });
 
-    const delivery = orderType === 'delivery' ? DELIVERY_FEE : 0;
+    const deliveryFee = (storeData && storeData.store && storeData.store.delivery_fee) ? storeData.store.delivery_fee : 0;
+    const delivery = orderType === 'delivery' ? deliveryFee : 0;
     message += `\nSubtotal: $${total.toLocaleString()}`;
     if (orderType === 'delivery') message += `\nDelivery: $${delivery}`;
     message += `\n*Total: $${(total + delivery).toLocaleString()}*`;
@@ -370,20 +484,24 @@ function sendOrder() {
     if (orderType === 'delivery') message += `\nDirección: ${address}`;
     message += `\nPago: ${paymentMethod === 'efectivo' ? 'Efectivo' : 'Transferencia'}`;
 
-    const url = 'https://api.whatsapp.com/send?phone=5491124091027&text=' + encodeURIComponent(message);
+    const whatsappNumber = storeData && storeData.store && storeData.store.whatsapp_number
+        ? storeData.store.whatsapp_number
+        : '5491124091027';
+    const url = `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=` + encodeURIComponent(message);
     window.open(url, '_blank');
 }
 
 // ===== SHARE =====
 function shareMenu() {
+    const storeName = storeData && storeData.store ? storeData.store.name : 'este local';
     if (navigator.share) {
         navigator.share({
-            title: 'Comidas Demostración',
-            text: 'Mirá el menú de Comidas Demostración',
+            title: storeName,
+            text: `Mirá el menú de ${storeName}`,
             url: window.location.href
         });
     } else {
-        const url = 'https://api.whatsapp.com/send?text=' + encodeURIComponent('Mirá el menú de Comidas Demostración: ' + window.location.href);
+        const url = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(`Mirá el menú de ${storeName}: ` + window.location.href);
         window.open(url, '_blank');
     }
 }
@@ -408,4 +526,8 @@ window.addEventListener('scroll', () => {
     if (heroImg && scrolled < 300) {
         heroImg.style.transform = `translateY(${scrolled * 0.3}px) scale(${1 + scrolled * 0.0005})`;
     }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    initStore();
 });
