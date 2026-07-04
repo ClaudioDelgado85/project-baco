@@ -346,6 +346,8 @@ function openProductModal(id) {
     currentVariant = 0;
     modalQty = 1;
     selectedExtras = [];
+    const commentEl = document.querySelector('.comments-area');
+    if (commentEl) commentEl.value = '';
 
     document.getElementById('modalImage').src = p.image_url || '';
     document.getElementById('modalImage').alt = p.name;
@@ -451,6 +453,8 @@ function addToCart() {
         variantName = currentProduct.variants[currentVariant].name;
     }
     const extrasTotal = selectedExtras.reduce((sum, e) => sum + e.price, 0);
+    const commentEl = document.querySelector('.comments-area');
+    const comment = commentEl ? commentEl.value.trim() : '';
     const item = {
         id: currentProduct.id + '_' + Date.now(),
         productId: currentProduct.id,
@@ -458,6 +462,7 @@ function addToCart() {
         img: currentProduct.image_url || '',
         variant: variantName,
         extras: [...selectedExtras],
+        comment: comment,
         price: price + extrasTotal,
         qty: modalQty
     };
@@ -637,7 +642,9 @@ function sendOrder() {
         message += `${i+1}. ${item.name}`;
         if (item.variant) message += ` (${item.variant})`;
         if (item.extras.length > 0) message += ` + ${item.extras.map(e => e.name).join(', ')}`;
-        message += ` x${item.qty} - $${(item.price * item.qty).toLocaleString()}\n`;
+        message += ` x${item.qty} - $${(item.price * item.qty).toLocaleString()}`;
+        if (item.comment) message += `\n   📝 ${item.comment}`;
+        message += '\n';
         total += item.price * item.qty;
     });
 
