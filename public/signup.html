@@ -128,8 +128,21 @@
             text-decoration: none;
         }
         .auth-footer a:hover { text-decoration: underline; }
-        @media (max-width: 480px) {
-            .auth-card { padding: 28px 20px; }
+        /* Mobile-First: base is mobile */
+        body { padding: 12px; }
+        .auth-card { padding: 24px 16px; }
+        .auth-logo h1 { font-size: 20px; }
+        .auth-logo p { font-size: 13px; }
+        .form-group input { padding: 10px 12px; font-size: 14px; }
+        .submit-btn { padding: 12px; font-size: 14px; }
+
+        @media (min-width: 480px) {
+            body { padding: 20px; }
+            .auth-card { padding: 40px; }
+            .auth-logo h1 { font-size: 24px; }
+            .auth-logo p { font-size: 14px; }
+            .form-group input { padding: 12px 14px; font-size: 15px; }
+            .submit-btn { padding: 14px; font-size: 15px; }
         }
     </style>
 </head>

@@ -126,10 +126,10 @@ function renderProducts() {
 
     tbody.innerHTML = products.map(p => `
         <tr>
-            <td class="product-name-cell">${escapeHtml(p.name)}</td>
-            <td class="product-category-cell">${escapeHtml(p.category_name || '—')}</td>
-            <td class="product-price-cell">$${(p.price || 0).toLocaleString()}</td>
-            <td class="actions-cell">
+            <td class="product-name-cell" data-label="Producto">${escapeHtml(p.name)}</td>
+            <td class="product-category-cell" data-label="Categoría">${escapeHtml(p.category_name || '—')}</td>
+            <td class="product-price-cell" data-label="Precio">$${(p.price || 0).toLocaleString()}</td>
+            <td class="actions-cell" data-label="">
                 <button class="btn btn-secondary btn-sm" onclick="editProduct(${p.id})">Editar</button>
                 <button class="btn btn-danger btn-sm" onclick="confirmDelete(${p.id})">Eliminar</button>
             </td>
@@ -152,9 +152,9 @@ function renderCategories() {
 
     tbody.innerHTML = categories.map(c => `
         <tr>
-            <td>${escapeHtml(c.name)}</td>
-            <td>${c.order_index || 0}</td>
-            <td class="actions-cell">
+            <td data-label="Nombre">${escapeHtml(c.name)}</td>
+            <td data-label="Orden">${c.order_index || 0}</td>
+            <td class="actions-cell" data-label="">
                 <button class="btn btn-secondary btn-sm" onclick="editCategory(${c.id})">Editar</button>
                 <button class="btn btn-danger btn-sm" onclick="deleteCategory(${c.id})">Eliminar</button>
             </td>
@@ -301,9 +301,9 @@ function renderVariants(variants = []) {
         return;
     }
     container.innerHTML = variants.map((v, i) => `
-        <div class="variant-row" style="display:flex;gap:8px;margin-bottom:8px;align-items:center;">
-            <input type="text" class="variant-name" value="${escapeHtml(v.name)}" placeholder="Ej: Simple" style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;outline:none;">
-            <input type="number" class="variant-price" value="${v.price}" placeholder="$$$" style="width:100px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;outline:none;">
+        <div class="variant-row" style="display:flex;gap:8px;margin-bottom:8px;align-items:center;flex-wrap:wrap;">
+            <input type="text" class="variant-name" value="${escapeHtml(v.name)}" placeholder="Ej: Simple" style="flex:1;min-width:100px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;outline:none;">
+            <input type="number" class="variant-price" value="${v.price}" placeholder="$$$" style="width:90px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;outline:none;">
             <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()" style="padding:6px 10px;">×</button>
         </div>
     `).join('');
@@ -315,10 +315,10 @@ function addVariant() {
     if (emptyText) container.innerHTML = '';
     const row = document.createElement('div');
     row.className = 'variant-row';
-    row.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;align-items:center;';
+    row.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;align-items:center;flex-wrap:wrap;';
     row.innerHTML = `
-        <input type="text" class="variant-name" placeholder="Ej: Simple" style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;outline:none;">
-        <input type="number" class="variant-price" placeholder="$$$" style="width:100px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;outline:none;">
+        <input type="text" class="variant-name" placeholder="Ej: Simple" style="flex:1;min-width:100px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;outline:none;">
+        <input type="number" class="variant-price" placeholder="$$$" style="width:90px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;outline:none;">
         <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()" style="padding:6px 10px;">×</button>
     `;
     container.appendChild(row);
