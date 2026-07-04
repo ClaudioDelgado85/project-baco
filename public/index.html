@@ -74,8 +74,12 @@
         </div>
     </nav>
 
-    <!-- LOADING SKELETON -->
-    <div id="loading-skeleton" style="padding:2rem;text-align:center;font-family:sans-serif;color:#888;">Cargando menú...</div>
+    <!-- FULL-PAGE LOADING OVERLAY — hides until JS renders all data -->
+    <div id="loadingOverlay" style="position:fixed;inset:0;z-index:9999;background:var(--bg,#0f0f1a);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:'Inter',sans-serif;">
+        <div style="width:40px;height:40px;border:3px solid rgba(255,255,255,0.1);border-top-color:var(--primary,#FF6B35);border-radius:50%;animation:loadSpin 0.8s linear infinite;"></div>
+        <div style="color:var(--text-muted,#a0a0b8);font-size:14px;font-weight:500;">Cargando menú...</div>
+        <style>@keyframes loadSpin{to{transform:rotate(360deg)}}</style>
+    </div>
 
     <!-- PRODUCTS CONTAINER - filled dynamically by renderProducts() -->
     <!-- PRODUCTS CONTAINER - filled dynamically by renderProducts() -->

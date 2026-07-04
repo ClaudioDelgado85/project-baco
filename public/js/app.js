@@ -96,8 +96,6 @@ async function initStore() {
         return;
     }
 
-    const skeleton = document.getElementById('loading-skeleton');
-
     try {
         const res = await fetch(`/api/public/store/${slug}`);
         if (!res.ok) {
@@ -112,7 +110,13 @@ async function initStore() {
         renderCategories(data.categories);
         renderProducts(data.categories, data.products);
 
-        if (skeleton) skeleton.style.display = 'none';
+        // Hide loading overlay — everything is now rendered
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) {
+            overlay.style.opacity = '0';
+            overlay.style.transition = 'opacity 0.3s ease';
+            setTimeout(() => { overlay.style.display = 'none'; }, 300);
+        }
 
         // Re-attach IntersectionObserver after dynamic render
         const observer = new IntersectionObserver((entries) => {
@@ -127,7 +131,8 @@ async function initStore() {
         document.querySelectorAll('section[data-cat-id]').forEach(s => observer.observe(s));
 
     } catch (err) {
-        if (skeleton) skeleton.style.display = 'none';
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) overlay.style.display = 'none';
         document.body.innerHTML = '<div style="padding:2rem;text-align:center;font-family:sans-serif;"><h2>Tienda no encontrada</h2><p>El enlace que ingresaste no corresponde a ninguna tienda disponible.</p></div>';
     }
 }
