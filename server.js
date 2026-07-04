@@ -282,6 +282,249 @@ app.post('/api/auth/logout', (req, res) => {
   });
 });
 
+// Auth middleware for dashboard routes
+function ensureAuth(req, res, next) {
+  if (!req.session.userId) {
+    if (req.method === 'GET') {
+      return res.redirect('/login');
+    }
+    return res.status(401).json({ success: false, error: 'Unauthorized' });
+  }
+  next();
+}
+
+// Auth pages — serve HTML directly (no session required)
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+app.get('/signup', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'signup.html'));
+});
+
+// Dashboard protected routes
+app.get('/dashboard', ensureAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
+// GET /api/dashboard/products — list products for authenticated user's store
+app.get('/api/dashboard/products', ensureAuth, (req, res) => {
+  db.all(
+    `SELECT p.*, c.name as category_name FROM products p
+     LEFT JOIN categories c ON p.category_id = c.id
+     WHERE p.store_id = (SELECT id FROM stores WHERE user_id = ?)
+     ORDER BY p.id DESC`,
+    [req.session.userId],
+    (err, products) => {
+      if (err) {
+        return res.status(500).json({ success: false, error: err.message });
+      }
+      const parsed = products.map(p => ({
+        ...p,
+        variants: p.variants_json ? JSON.parse(p.variants_json) : []
+      }));
+      return res.json({ success: true, data: parsed });
+    }
+  );
+});
+
+// POST /api/dashboard/products — create product under user's store
+app.post('/api/dashboard/products', ensureAuth, (req, res) => {
+  const { category_id, name, description, image_url, price, original_price, has_discount, variants_json } = req.body;
+
+  if (!name || price === undefined || price === null) {
+    return res.status(400).json({ success: false, error: 'Name and price are required' });
+  }
+
+  db.run(
+    `INSERT INTO products (store_id, category_id, name, description, image_url, price, original_price, has_discount, variants_json)
+     VALUES ((SELECT id FROM stores WHERE user_id = ?), ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [req.session.userId, category_id || null, name, description || '', image_url || '', price, original_price || null, has_discount ? 1 : 0, variants_json || null],
+    function (err) {
+      if (err) {
+        return res.status(500).json({ success: false, error: err.message });
+      }
+
+      // Fetch the created product to return full data
+      db.get(
+        `SELECT p.*, c.name as category_name FROM products p
+         LEFT JOIN categories c ON p.category_id = c.id
+         WHERE p.id = ?`,
+        [this.lastID],
+        (err, product) => {
+          if (err) {
+            return res.status(500).json({ success: false, error: err.message });
+          }
+          const parsed = {
+            ...product,
+            variants: product.variants_json ? JSON.parse(product.variants_json) : []
+          };
+          return res.status(201).json({ success: true, data: parsed });
+        }
+      );
+    }
+  );
+});
+
+// PUT /api/dashboard/products/:id — update with ownership check
+app.put('/api/dashboard/products/:id', ensureAuth, (req, res) => {
+  const { id } = req.params;
+  const { category_id, name, description, image_url, price, original_price, has_discount, variants_json } = req.body;
+
+  db.run(
+    `UPDATE products SET
+      category_id = ?,
+      name = ?,
+      description = ?,
+      image_url = ?,
+      price = ?,
+      original_price = ?,
+      has_discount = ?,
+      variants_json = ?
+     WHERE id = ? AND store_id = (SELECT id FROM stores WHERE user_id = ?)`,
+    [category_id || null, name, description || '', image_url || '', price, original_price || null, has_discount ? 1 : 0, variants_json || null, id, req.session.userId],
+    function (err) {
+      if (err) {
+        return res.status(500).json({ success: false, error: err.message });
+      }
+      if (this.changes === 0) {
+        return res.status(403).json({ success: false, error: 'Not found or not authorized' });
+      }
+
+      // Fetch the updated product
+      db.get(
+        `SELECT p.*, c.name as category_name FROM products p
+         LEFT JOIN categories c ON p.category_id = c.id
+         WHERE p.id = ?`,
+        [id],
+        (err, product) => {
+          if (err) {
+            return res.status(500).json({ success: false, error: err.message });
+          }
+          const parsed = {
+            ...product,
+            variants: product.variants_json ? JSON.parse(product.variants_json) : []
+          };
+          return res.json({ success: true, data: parsed });
+        }
+      );
+    }
+  );
+});
+
+// DELETE /api/dashboard/products/:id — delete with ownership check
+app.delete('/api/dashboard/products/:id', ensureAuth, (req, res) => {
+  const { id } = req.params;
+
+  db.run(
+    `DELETE FROM products WHERE id = ? AND store_id = (SELECT id FROM stores WHERE user_id = ?)`,
+    [id, req.session.userId],
+    function (err) {
+      if (err) {
+        return res.status(500).json({ success: false, error: err.message });
+      }
+      if (this.changes === 0) {
+        return res.status(403).json({ success: false, error: 'Not found or not authorized' });
+      }
+      return res.json({ success: true, message: 'Product deleted' });
+    }
+  );
+});
+
+// GET /api/dashboard/store — return authenticated user's store data
+app.get('/api/dashboard/store', ensureAuth, (req, res) => {
+  db.get(
+    'SELECT * FROM stores WHERE user_id = ?',
+    [req.session.userId],
+    (err, store) => {
+      if (err) {
+        return res.status(500).json({ success: false, error: err.message });
+      }
+      if (!store) {
+        return res.status(404).json({ success: false, error: 'Store not found' });
+      }
+      return res.json({ success: true, data: store });
+    }
+  );
+});
+
+// PUT /api/dashboard/store — update store settings
+app.put('/api/dashboard/store', ensureAuth, (req, res) => {
+  const { name, slug, address, whatsapp_number, instagram_url, delivery_fee, logo_url, cover_url } = req.body;
+
+  // If slug is being changed, check uniqueness first
+  if (slug) {
+    db.get(
+      'SELECT id FROM stores WHERE slug = ? AND user_id != ?',
+      [slug, req.session.userId],
+      (err, existing) => {
+        if (err) {
+          return res.status(500).json({ success: false, error: err.message });
+        }
+        if (existing) {
+          return res.status(409).json({ success: false, error: 'Slug already taken' });
+        }
+        proceedWithUpdate();
+      }
+    );
+  } else {
+    proceedWithUpdate();
+  }
+
+  function proceedWithUpdate() {
+    db.run(
+      `UPDATE stores SET
+        name = COALESCE(?, name),
+        slug = COALESCE(?, slug),
+        address = COALESCE(?, address),
+        whatsapp_number = COALESCE(?, whatsapp_number),
+        instagram_url = COALESCE(?, instagram_url),
+        delivery_fee = COALESCE(?, delivery_fee),
+        logo_url = COALESCE(?, logo_url),
+        cover_url = COALESCE(?, cover_url)
+       WHERE user_id = ?`,
+      [name, slug, address, whatsapp_number, instagram_url, delivery_fee, logo_url, cover_url, req.session.userId],
+      function (err) {
+        if (err) {
+          if (err.message.includes('UNIQUE constraint failed: stores.slug')) {
+            return res.status(409).json({ success: false, error: 'Slug already taken' });
+          }
+          return res.status(500).json({ success: false, error: err.message });
+        }
+
+        // Fetch the updated store
+        db.get(
+          'SELECT * FROM stores WHERE user_id = ?',
+          [req.session.userId],
+          (err, store) => {
+            if (err) {
+              return res.status(500).json({ success: false, error: err.message });
+            }
+            // Update session data with new values
+            if (store.slug) req.session.storeSlug = store.slug;
+            if (store.name) req.session.storeName = store.name;
+            return res.json({ success: true, data: store });
+          }
+        );
+      }
+    );
+  }
+});
+
+// GET /api/dashboard/categories — list categories for authenticated user's store
+app.get('/api/dashboard/categories', ensureAuth, (req, res) => {
+  db.all(
+    'SELECT * FROM categories WHERE store_id = (SELECT id FROM stores WHERE user_id = ?) ORDER BY order_index ASC',
+    [req.session.userId],
+    (err, categories) => {
+      if (err) {
+        return res.status(500).json({ success: false, error: err.message });
+      }
+      return res.json({ success: true, data: categories });
+    }
+  );
+});
+
 // Private dashboard summary route
 app.get('/api/dashboard/summary', (req, res) => {
   if (!req.session.userId) {

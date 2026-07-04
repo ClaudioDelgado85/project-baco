@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de tienda — YaMenu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <header class="topbar">
+        <div class="topbar-brand">YaMenu · Panel</div>
+        <nav class="topbar-nav">
+            <button data-tab="products" class="active" onclick="switchTab('products')">Productos</button>
+            <button data-tab="settings" onclick="switchTab('settings')">Configuración</button>
+        </nav>
+        <div class="topbar-right">
+            <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Products Panel -->
+        <section class="panel active" id="productsPanel">
+            <div class="panel-header">
+                <div>
+                    <h2 class="panel-title">Productos</h2>
+                    <p class="panel-subtitle">Gestioná los productos de tu tienda</p>
+                </div>
+                <button class="btn btn-primary" onclick="openCreateModal()">+ Agregar producto</button>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Categoría</th>
+                            <th>Precio</th>
+                            <th style="width:120px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTableBody"></tbody>
+                </table>
+                <div class="empty-state" id="productsEmpty" style="display:none;">
+                    <p>No tenés productos todavía. ¡Agregá tu primer producto!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Settings Panel -->
+        <section class="panel" id="settingsPanel">
+            <div class="panel-header">
+                <div>
+                    <h2 class="panel-title">Configuración</h2>
+                    <p class="panel-subtitle">Datos de tu tienda</p>
+                </div>
+            </div>
+
+            <div class="form-card">
+                <form id="settingsForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="storeName">Nombre de la tienda</label>
+                            <input type="text" id="storeName" placeholder="Mi Tienda" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="storeSlug">Slug</label>
+                            <input type="text" id="storeSlug" placeholder="mi-tienda" required>
+                            <div class="form-hint">URL pública: /s/mi-tienda</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="storeAddress">Dirección</label>
+                        <input type="text" id="storeAddress" placeholder="Av. Corrientes 1234, CABA">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="storeWhatsapp">WhatsApp (código de área + número)</label>
+                            <input type="text" id="storeWhatsapp" placeholder="5491124091027">
+                        </div>
+                        <div class="form-group">
+                            <label for="storeInstagram">Instagram URL</label>
+                            <input type="url" id="storeInstagram" placeholder="https://instagram.com/tu-cuenta">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="storeDeliveryFee">Costo de delivery ($)</label>
+                            <input type="number" id="storeDeliveryFee" placeholder="500" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="storeLogoUrl">Logo URL</label>
+                            <input type="url" id="storeLogoUrl" placeholder="https://...">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="storeCoverUrl">Cover / Portada URL</label>
+                        <input type="url" id="storeCoverUrl" placeholder="https://...">
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Product Create/Edit Modal -->
+    <div class="modal-overlay" id="productModal">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeProductModal()">×</button>
+            <h3 class="modal-title" id="modalTitle">Agregar producto</h3>
+            <form id="productForm">
+                <input type="hidden" id="productIdField">
+
+                <div class="form-group">
+                    <label for="productName">Nombre del producto *</label>
+                    <input type="text" id="productName" placeholder="Ej: Cheeseburger" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="productDesc">Descripción</label>
+                    <textarea id="productDesc" placeholder="Descripción del producto" rows="3"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="categorySelect">Categoría</label>
+                        <select id="categorySelect"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="productPrice">Precio ($) *</label>
+                        <input type="number" id="productPrice" placeholder="1600" min="0" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="productImageUrl">Imagen URL</label>
+                        <input type="url" id="productImageUrl" placeholder="https://...">
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="productHasDiscount" style="width:auto;margin-right:6px;">
+                            Tiene descuento
+                        </label>
+                        <input type="number" id="productOriginalPrice" placeholder="Precio original $" min="0" style="margin-top:8px;">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Variantes <span class="form-hint" style="display:inline;margin-left:4px;">(opcional)</span></label>
+                    <div id="variantsContainer">
+                        <p style="color:var(--text-muted);font-size:13px;">Sin variantes. Agregá opciones como talle o tamaño.</p>
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="addVariant()" style="margin-top:8px;">+ Agregar variante</button>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeProductModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal-box confirm-dialog">
+            <h3 class="modal-title">Eliminar producto</h3>
+            <p>¿Estás seguro de que querés eliminar <strong id="deleteProductName">este producto</strong>? Esta acción no se puede deshacer.</p>
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancelar</button>
+                <button class="btn btn-danger" onclick="confirmDeleteAction()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="/js/dashboard.js"></script>
+</body>
+</html>
