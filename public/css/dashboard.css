@@ -350,6 +350,49 @@ tr:hover {
     margin-top: 8px;
 }
 
+/* ===== File Input & Preview ===== */
+.file-input {
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text);
+    padding: 6px 0;
+    cursor: pointer;
+}
+
+.file-input::file-selector-button {
+    padding: 6px 14px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    margin-right: 10px;
+    transition: all 0.15s;
+}
+
+.file-input::file-selector-button:hover {
+    background: var(--border);
+}
+
+.preview-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.preview-thumb {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg);
+}
+
 /* ===== Modal ===== */
 .modal-overlay {
     position: fixed;
@@ -509,6 +552,71 @@ tr:hover {
     }
 
     table { min-width: 600px; }
+}
+
+/* ===== Theme Selector ===== */
+.theme-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.theme-selector select {
+    width: 100%;
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    outline: none;
+    cursor: pointer;
+}
+
+.theme-preview {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: #fff;
+}
+
+.tp-header {
+    padding: 16px;
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+    text-align: center;
+    transition: background 0.2s;
+}
+
+.tp-card {
+    padding: 16px;
+    display: flex;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.tp-btn {
+    padding: 8px 24px;
+    border-radius: 6px;
+    color: #fff;
+    font-weight: 600;
+    font-size: 13px;
+    transition: background 0.2s;
+}
+
+@media (max-width: 768px) {
+    .theme-selector select {
+        font-size: 13px;
+    }
+    .tp-header {
+        padding: 12px;
+        font-size: 13px;
+    }
+    .tp-card {
+        padding: 12px;
+    }
 }
 
 @media (max-width: 480px) {

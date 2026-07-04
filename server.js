@@ -4,6 +4,9 @@ const SQLiteStore = require('connect-sqlite3')(session);
 const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcryptjs');
 const path = require('path');
+const multer = require('multer');
+const crypto = require('crypto');
+const sharp = require('sharp');
 require('dotenv').config();
 
 const app = express();
@@ -80,6 +83,11 @@ db.serialize(() => {
     )
   `);
 
+  // Migration: add theme_id column (safe to run on existing DB)
+  db.run(`ALTER TABLE stores ADD COLUMN theme_id INTEGER DEFAULT 0`, (err) => {
+    // Error expected if column already exists — ignore
+  });
+
   // Seed data for demo store 'mi-tienda' (only if it doesn't exist)
   db.run(`INSERT OR IGNORE INTO users (id, email, password_hash, tier) VALUES (999, 'demo@mi-tienda.com', '$2a$10$demohashdemohashdemohashdemohashdemohashdemohashdemo', 'standard')`);
 
@@ -125,6 +133,18 @@ app.use(session({
     secure: false // Set to true in production with HTTPS
   }
 }));
+
+// Multer configuration for file uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith('image/')) {
+      return cb(new Error('Only image files are allowed'), false);
+    }
+    cb(null, true);
+  }
+});
 
 // API Routes
 
@@ -431,6 +451,39 @@ app.delete('/api/dashboard/products/:id', ensureAuth, (req, res) => {
   );
 });
 
+// POST /api/dashboard/upload — upload image file, process with Sharp, return URL
+app.post('/api/dashboard/upload', ensureAuth, (req, res) => {
+  upload.single('file')(req, res, async (err) => {
+    if (err) {
+      if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          return res.status(413).json({ success: false, error: 'File too large. Maximum size is 2MB.' });
+        }
+        return res.status(400).json({ success: false, error: err.message });
+      }
+      return res.status(400).json({ success: false, error: err.message });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No file provided' });
+    }
+
+    try {
+      const filename = `${Date.now()}-${crypto.randomUUID()}.webp`;
+      const outputPath = path.join(__dirname, 'public', 'uploads', filename);
+
+      await sharp(req.file.buffer)
+        .resize(600, 600, { fit: 'inside', withoutEnlargement: true })
+        .webp({ quality: 75 })
+        .toFile(outputPath);
+
+      return res.json({ success: true, url: `/uploads/${filename}` });
+    } catch (sharpErr) {
+      return res.status(500).json({ success: false, error: 'Error processing image' });
+    }
+  });
+});
+
 // GET /api/dashboard/store — return authenticated user's store data
 app.get('/api/dashboard/store', ensureAuth, (req, res) => {
   db.get(
@@ -450,7 +503,7 @@ app.get('/api/dashboard/store', ensureAuth, (req, res) => {
 
 // PUT /api/dashboard/store — update store settings
 app.put('/api/dashboard/store', ensureAuth, (req, res) => {
-  const { name, slug, address, whatsapp_number, instagram_url, delivery_fee, logo_url, cover_url } = req.body;
+  const { name, slug, address, whatsapp_number, instagram_url, delivery_fee, logo_url, cover_url, theme_id } = req.body;
 
   // If slug is being changed, check uniqueness first
   if (slug) {
@@ -481,9 +534,10 @@ app.put('/api/dashboard/store', ensureAuth, (req, res) => {
         instagram_url = COALESCE(?, instagram_url),
         delivery_fee = COALESCE(?, delivery_fee),
         logo_url = COALESCE(?, logo_url),
-        cover_url = COALESCE(?, cover_url)
+        cover_url = COALESCE(?, cover_url),
+        theme_id = COALESCE(?, theme_id)
        WHERE user_id = ?`,
-      [name, slug, address, whatsapp_number, instagram_url, delivery_fee, logo_url, cover_url, req.session.userId],
+      [name, slug, address, whatsapp_number, instagram_url, delivery_fee, logo_url, cover_url, theme_id, req.session.userId],
       function (err) {
         if (err) {
           if (err.message.includes('UNIQUE constraint failed: stores.slug')) {
@@ -521,6 +575,56 @@ app.get('/api/dashboard/categories', ensureAuth, (req, res) => {
         return res.status(500).json({ success: false, error: err.message });
       }
       return res.json({ success: true, data: categories });
+    }
+  );
+});
+
+// POST /api/dashboard/categories — create category
+app.post('/api/dashboard/categories', ensureAuth, (req, res) => {
+  const { name, order_index } = req.body;
+  if (!name) return res.status(400).json({ success: false, error: 'Category name is required' });
+
+  db.run(
+    `INSERT INTO categories (store_id, name, order_index) VALUES ((SELECT id FROM stores WHERE user_id = ?), ?, ?)`,
+    [req.session.userId, name, order_index || 0],
+    function (err) {
+      if (err) return res.status(500).json({ success: false, error: err.message });
+      db.get('SELECT * FROM categories WHERE id = ?', [this.lastID], (err, cat) => {
+        if (err) return res.status(500).json({ success: false, error: err.message });
+        return res.status(201).json({ success: true, data: cat });
+      });
+    }
+  );
+});
+
+// PUT /api/dashboard/categories/:id — update category
+app.put('/api/dashboard/categories/:id', ensureAuth, (req, res) => {
+  const { name, order_index } = req.body;
+
+  db.run(
+    `UPDATE categories SET name = COALESCE(?, name), order_index = COALESCE(?, order_index)
+     WHERE id = ? AND store_id = (SELECT id FROM stores WHERE user_id = ?)`,
+    [name, order_index, req.params.id, req.session.userId],
+    function (err) {
+      if (err) return res.status(500).json({ success: false, error: err.message });
+      if (this.changes === 0) return res.status(403).json({ success: false, error: 'Not found or not authorized' });
+      db.get('SELECT * FROM categories WHERE id = ?', [req.params.id], (err, cat) => {
+        if (err) return res.status(500).json({ success: false, error: err.message });
+        return res.json({ success: true, data: cat });
+      });
+    }
+  );
+});
+
+// DELETE /api/dashboard/categories/:id — delete category
+app.delete('/api/dashboard/categories/:id', ensureAuth, (req, res) => {
+  db.run(
+    `DELETE FROM categories WHERE id = ? AND store_id = (SELECT id FROM stores WHERE user_id = ?)`,
+    [req.params.id, req.session.userId],
+    function (err) {
+      if (err) return res.status(500).json({ success: false, error: err.message });
+      if (this.changes === 0) return res.status(403).json({ success: false, error: 'Not found or not authorized' });
+      return res.json({ success: true, message: 'Category deleted' });
     }
   );
 });

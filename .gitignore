@@ -4,3 +4,5 @@ saas.db
 saas.db-journal
 *.db
 *.log
+public/uploads/*
+!public/uploads/.gitkeep

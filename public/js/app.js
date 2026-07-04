@@ -1,6 +1,83 @@
 // ===== STORE DATA =====
 let storeData = null;
 
+// ===== THEMES =====
+const THEMES = [
+  { // 0 — Naranja clásico
+    name: 'Naranja clásico',
+    bg: '#1a1a1a', bgCard: '#2a2a3e', bgElevated: '#353555',
+    text: '#ffffff', textMuted: '#a0a0b8', textDim: '#6b6b8a',
+    primary: '#FF6B35', primaryDark: '#E55A2B'
+  },
+  { // 1 — Verde fresco
+    name: 'Verde fresco',
+    bg: '#1a3320', bgCard: '#24442a', bgElevated: '#2e5535',
+    text: '#ffffff', textMuted: '#a0b8a8', textDim: '#6b8a76',
+    primary: '#2ecc71', primaryDark: '#27ae60'
+  },
+  { // 2 — Azul marino
+    name: 'Azul marino',
+    bg: '#1a2744', bgCard: '#243658', bgElevated: '#2e456c',
+    text: '#ffffff', textMuted: '#a0b0c0', textDim: '#6b7a90',
+    primary: '#3498db', primaryDark: '#2980b9'
+  },
+  { // 3 — Borgoña
+    name: 'Borgoña',
+    bg: '#2c1010', bgCard: '#3c1a1a', bgElevated: '#4c2424',
+    text: '#ffffff', textMuted: '#b8a0a0', textDim: '#8a6b6b',
+    primary: '#c0392b', primaryDark: '#a93226'
+  },
+  { // 4 — Dark Tiffany
+    name: 'Dark Tiffany',
+    bg: '#171717', bgCard: '#252535', bgElevated: '#303050',
+    text: '#ffffff', textMuted: '#a0a0b8', textDim: '#6b6b8a',
+    primary: '#21F1A8', primaryDark: '#1ad096'
+  },
+  { // 5 — White Pink
+    name: 'White Pink',
+    bg: '#FFF9FA', bgCard: '#ffffff', bgElevated: '#f5eef0',
+    text: '#1a1a1a', textMuted: '#6b6b7a', textDim: '#a0a0b0',
+    primary: '#FD1843', primaryDark: '#e0153a'
+  },
+  { // 6 — Sand Cyprus
+    name: 'Sand Cyprus',
+    bg: '#F0EDE4', bgCard: '#ffffff', bgElevated: '#e6e2d8',
+    text: '#1a1a1a', textMuted: '#6b6b6b', textDim: '#a0a0a0',
+    primary: '#004741', primaryDark: '#003530'
+  },
+  { // 7 — Mantis Milky
+    name: 'Mantis Milky',
+    bg: '#FFFDF1', bgCard: '#ffffff', bgElevated: '#f8f4e8',
+    text: '#1a1a1a', textMuted: '#6b6b6b', textDim: '#a0a0a0',
+    primary: '#59C759', primaryDark: '#4ab04a'
+  },
+  { // 8 — Malt Turmeric
+    name: 'Malt Turmeric',
+    bg: '#2A2312', bgCard: '#3a3322', bgElevated: '#4a4332',
+    text: '#ffffff', textMuted: '#b0a890', textDim: '#8a826a',
+    primary: '#FFBE0B', primaryDark: '#e0a800'
+  },
+  { // 9 — Bridal Tone
+    name: 'Bridal Tone',
+    bg: '#FFC6A8', bgCard: '#ffffff', bgElevated: '#f5ba9a',
+    text: '#1a1a1a', textMuted: '#6b5a50', textDim: '#a09080',
+    primary: '#741A2F', primaryDark: '#601527'
+  }
+];
+
+function applyTheme(themeId) {
+  const theme = THEMES[themeId] || THEMES[0];
+  const root = document.documentElement;
+  root.style.setProperty('--bg', theme.bg);
+  root.style.setProperty('--bg-card', theme.bgCard);
+  root.style.setProperty('--bg-elevated', theme.bgElevated);
+  root.style.setProperty('--text', theme.text);
+  root.style.setProperty('--text-muted', theme.textMuted);
+  root.style.setProperty('--text-dim', theme.textDim);
+  root.style.setProperty('--primary', theme.primary);
+  root.style.setProperty('--primary-dark', theme.primaryDark);
+}
+
 let cart = [];
 let currentProduct = null;
 let currentVariant = 0;
@@ -29,6 +106,7 @@ async function initStore() {
         const data = await res.json();
         storeData = data;
 
+        applyTheme(data.store.theme_id);
         renderStoreProfile(data.store);
         renderCategories(data.categories);
         renderProducts(data.categories, data.products);
@@ -102,19 +180,39 @@ function renderProducts(categories, products) {
     const container = document.getElementById('products-container');
     if (!container) return;
 
-    container.innerHTML = categories.map(cat => {
+    const catIds = categories.map(c => c.id);
+    const grouped = categories.map(cat => {
         const catProducts = products.filter(p => p.category_id === cat.id);
-        if (catProducts.length === 0) return '';
+        return { ...cat, products: catProducts };
+    });
 
-        return `
-            <section id="cat-${cat.id}" data-cat-id="${cat.id}">
-                <h2 class="section-title">${cat.name}</h2>
+    // Products whose category doesn't exist in this store (orphans)
+    const orphans = products.filter(p => !catIds.includes(p.category_id));
+
+    const sections = grouped
+        .filter(g => g.products.length > 0)
+        .map(g => `
+            <section id="cat-${g.id}" data-cat-id="${g.id}">
+                <h2 class="section-title">${g.name}</h2>
                 <div class="products-grid">
-                    ${catProducts.map((p, idx) => renderProductCard(p, idx)).join('')}
+                    ${g.products.map((p, idx) => renderProductCard(p, idx)).join('')}
                 </div>
             </section>
-        `;
-    }).join('');
+        `);
+
+    // Show orphan products in their own section if any exist
+    if (orphans.length > 0) {
+        sections.push(`
+            <section>
+                <h2 class="section-title">Productos</h2>
+                <div class="products-grid">
+                    ${orphans.map((p, idx) => renderProductCard(p, idx)).join('')}
+                </div>
+            </section>
+        `);
+    }
+
+    container.innerHTML = sections.join('') || '<p style="text-align:center;padding:2rem;color:#888;">No hay productos disponibles</p>';
 }
 
 function renderProductCard(p, idx) {

@@ -14,6 +14,7 @@
         <div class="topbar-brand">YaMenu · Panel</div>
         <nav class="topbar-nav">
             <button data-tab="products" class="active" onclick="switchTab('products')">Productos</button>
+            <button data-tab="categories" onclick="switchTab('categories')">Categorías</button>
             <button data-tab="settings" onclick="switchTab('settings')">Configuración</button>
         </nav>
         <div class="topbar-right">
@@ -48,6 +49,33 @@
                 </table>
                 <div class="empty-state" id="productsEmpty" style="display:none;">
                     <p>No tenés productos todavía. ¡Agregá tu primer producto!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Categories Panel -->
+        <section class="panel" id="categoriesPanel">
+            <div class="panel-header">
+                <div>
+                    <h2 class="panel-title">Categorías</h2>
+                    <p class="panel-subtitle">Organizá tus productos por categorías</p>
+                </div>
+                <button class="btn btn-primary" onclick="openCategoryModal()">+ Nueva categoría</button>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Orden</th>
+                            <th style="width:120px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="categoriesTableBody"></tbody>
+                </table>
+                <div class="empty-state" id="categoriesEmpty" style="display:none;">
+                    <p>No tenés categorías todavía. ¡Creá tu primera categoría!</p>
                 </div>
             </div>
         </section>
@@ -97,14 +125,37 @@
                             <input type="number" id="storeDeliveryFee" placeholder="500" min="0">
                         </div>
                         <div class="form-group">
+                            <label>Tema visual</label>
+                            <div class="theme-selector">
+                                <select id="storeTheme" onchange="previewTheme(this.value)"></select>
+                                <div class="theme-preview" id="themePreview">
+                                    <div class="tp-header" id="tpHeader">Vista previa</div>
+                                    <div class="tp-card" id="tpCard">
+                                        <div class="tp-btn" id="tpBtn">Botón</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
                             <label for="storeLogoUrl">Logo URL</label>
                             <input type="url" id="storeLogoUrl" placeholder="https://...">
+                            <div class="preview-row">
+                                <input type="file" id="logoFile" accept="image/*" class="file-input">
+                                <img id="logoPreview" class="preview-thumb" style="display:none;" alt="Vista previa logo">
+                            </div>
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label for="storeCoverUrl">Cover / Portada URL</label>
                         <input type="url" id="storeCoverUrl" placeholder="https://...">
+                        <div class="preview-row">
+                            <input type="file" id="coverFile" accept="image/*" class="file-input">
+                            <img id="coverPreview" class="preview-thumb" style="display:none;" alt="Vista previa cover">
+                        </div>
                     </div>
 
                     <div class="form-actions">
@@ -149,6 +200,10 @@
                     <div class="form-group">
                         <label for="productImageUrl">Imagen URL</label>
                         <input type="url" id="productImageUrl" placeholder="https://...">
+                        <div class="preview-row">
+                            <input type="file" id="productImageFile" accept="image/*" class="file-input">
+                            <img id="productImagePreview" class="preview-thumb" style="display:none;" alt="Vista previa">
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>
@@ -169,6 +224,29 @@
 
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeProductModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div class="modal-overlay" id="categoryModal">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeCategoryModal()">×</button>
+            <h3 class="modal-title" id="categoryModalTitle">Nueva categoría</h3>
+            <form id="categoryForm">
+                <input type="hidden" id="categoryIdField">
+                <div class="form-group">
+                    <label for="categoryName">Nombre de la categoría *</label>
+                    <input type="text" id="categoryName" placeholder="Ej: Burgers, Pizzas, Bebidas" required>
+                </div>
+                <div class="form-group">
+                    <label for="categoryOrder">Orden</label>
+                    <input type="number" id="categoryOrder" placeholder="0" min="0" value="0">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeCategoryModal()">Cancelar</button>
                     <button type="submit" class="btn btn-primary">Guardar</button>
                 </div>
             </form>
