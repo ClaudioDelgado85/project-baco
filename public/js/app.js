@@ -370,7 +370,30 @@ function openProductModal(id) {
         document.getElementById('modalVariants').style.display = 'none';
     }
 
-    // Reset extras
+    // Extras
+    const extrasContainer = document.querySelector('#modalExtras .selector-options');
+    const modalExtrasSection = document.getElementById('modalExtras');
+
+    if (p.extras && p.extras.length > 0) {
+        modalExtrasSection.style.display = 'block';
+        extrasContainer.innerHTML = p.extras.map(e => `
+            <div class="extra-item" onclick="toggleExtra(this)">
+                <div class="extra-info">
+                    <div class="extra-checkbox">
+                        <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+                    </div>
+                    <span class="extra-name">${e.name}</span>
+                </div>
+                <span class="extra-price">+$${e.price.toLocaleString()}</span>
+            </div>
+        `).join('');
+    } else {
+        modalExtrasSection.style.display = 'none';
+        extrasContainer.innerHTML = '';
+    }
+
+    // Reset extras selection
+    selectedExtras = [];
     document.querySelectorAll('.extra-checkbox').forEach(c => c.classList.remove('checked'));
 
     updateModalTotal();
@@ -448,12 +471,15 @@ function quickAdd(id) {
     if (!storeData) return;
     const p = storeData.products.find(prod => prod.id === id);
     if (!p) return;
+
+    // If product has variants or extras, open the modal instead
+    if ((p.variants && p.variants.length > 0) || (p.extras && p.extras.length > 0)) {
+        openProductModal(id);
+        return;
+    }
+
     let price = p.price;
     let variantName = '';
-    if (p.variants && p.variants.length > 0) {
-        price = p.variants[0].price;
-        variantName = p.variants[0].name;
-    }
     const item = {
         id: id + '_' + Date.now(),
         productId: id,

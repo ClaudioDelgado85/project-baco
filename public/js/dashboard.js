@@ -249,8 +249,9 @@ function openCreateModal() {
     // Populate category dropdown
     populateCategorySelect(document.getElementById('categorySelect'));
 
-    // Clear variants
+    // Clear variants and extras
     document.getElementById('variantsContainer').innerHTML = '';
+    document.getElementById('extrasContainer').innerHTML = '<p style="color:var(--text-muted);font-size:13px;">Sin extras. Agregá opciones adicionales.</p>';
 
     document.getElementById('productModal').classList.add('open');
 }
@@ -289,6 +290,10 @@ async function editProduct(id) {
     // Render variants
     const variants = product.variants || [];
     renderVariants(variants);
+
+    // Render extras
+    const extras = product.extras || [];
+    renderExtras(extras);
 
     document.getElementById('productModal').classList.add('open');
 }
@@ -338,6 +343,51 @@ function collectVariants() {
     return variants.length > 0 ? variants : null;
 }
 
+// ===== Extras Editor (mirrors variants pattern) =====
+function renderExtras(extras = []) {
+    const container = document.getElementById('extrasContainer');
+    if (extras.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted);font-size:13px;">Sin extras. Agregá opciones adicionales.</p>';
+        return;
+    }
+    container.innerHTML = extras.map((e, i) => `
+        <div class="extra-row" style="display:flex;gap:8px;margin-bottom:8px;align-items:center;flex-wrap:wrap;">
+            <input type="text" class="extra-name-input" value="${escapeHtml(e.name)}" placeholder="Ej: Extra Queso" style="flex:1;min-width:100px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;outline:none;">
+            <input type="number" class="extra-price-input" value="${e.price}" placeholder="$$$" style="width:90px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;outline:none;">
+            <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()" style="padding:6px 10px;">×</button>
+        </div>
+    `).join('');
+}
+
+function addExtra() {
+    const container = document.getElementById('extrasContainer');
+    const emptyText = container.querySelector('p');
+    if (emptyText) container.innerHTML = '';
+    const row = document.createElement('div');
+    row.className = 'extra-row';
+    row.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;align-items:center;flex-wrap:wrap;';
+    row.innerHTML = `
+        <input type="text" class="extra-name-input" placeholder="Ej: Extra Queso" style="flex:1;min-width:100px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;outline:none;">
+        <input type="number" class="extra-price-input" placeholder="$$$" style="width:90px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;outline:none;">
+        <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()" style="padding:6px 10px;">×</button>
+    `;
+    container.appendChild(row);
+    row.querySelector('.extra-name-input').focus();
+}
+
+function collectExtras() {
+    const rows = document.querySelectorAll('#extrasContainer .extra-row');
+    const extras = [];
+    rows.forEach(row => {
+        const name = row.querySelector('.extra-name-input').value.trim();
+        const price = parseInt(row.querySelector('.extra-price-input').value);
+        if (name && !isNaN(price)) {
+            extras.push({ name, price });
+        }
+    });
+    return extras.length > 0 ? JSON.stringify(extras) : null;
+}
+
 // ===== Product Save =====
 document.getElementById('productForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -366,7 +416,8 @@ document.getElementById('productForm').addEventListener('submit', async (e) => {
         image_url: imageUrl,
         has_discount: document.getElementById('productHasDiscount').checked,
         original_price: document.getElementById('productOriginalPrice').value ? parseInt(document.getElementById('productOriginalPrice').value) : null,
-        variants_json: collectVariants() ? JSON.stringify(collectVariants()) : null
+        variants_json: collectVariants() ? JSON.stringify(collectVariants()) : null,
+        extras_json: collectExtras()
     };
 
     if (!body.name) { showToast('El nombre del producto es obligatorio', 'error'); return; }

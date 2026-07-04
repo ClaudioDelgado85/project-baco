@@ -93,6 +93,11 @@ db.serialize(() => {
     // Error expected if column already exists — ignore
   });
 
+  // Migration: add extras_json column
+  db.run(`ALTER TABLE products ADD COLUMN extras_json TEXT DEFAULT NULL`, (err) => {
+    // Error expected if column already exists — ignore
+  });
+
   // Seed data for demo store 'mi-tienda' (only if it doesn't exist)
   db.run(`INSERT OR IGNORE INTO users (id, email, password_hash, tier) VALUES (999, 'demo@mi-tienda.com', '$2a$10$demohashdemohashdemohashdemohashdemohashdemohashdemo', 'standard')`);
 
@@ -346,7 +351,8 @@ app.get('/api/dashboard/products', ensureAuth, (req, res) => {
       }
       const parsed = products.map(p => ({
         ...p,
-        variants: p.variants_json ? JSON.parse(p.variants_json) : []
+        variants: p.variants_json ? JSON.parse(p.variants_json) : [],
+        extras: p.extras_json ? JSON.parse(p.extras_json) : []
       }));
       return res.json({ success: true, data: parsed });
     }
@@ -355,16 +361,16 @@ app.get('/api/dashboard/products', ensureAuth, (req, res) => {
 
 // POST /api/dashboard/products — create product under user's store
 app.post('/api/dashboard/products', ensureAuth, (req, res) => {
-  const { category_id, name, description, image_url, price, original_price, has_discount, variants_json } = req.body;
+  const { category_id, name, description, image_url, price, original_price, has_discount, variants_json, extras_json } = req.body;
 
   if (!name || price === undefined || price === null) {
     return res.status(400).json({ success: false, error: 'Name and price are required' });
   }
 
   db.run(
-    `INSERT INTO products (store_id, category_id, name, description, image_url, price, original_price, has_discount, variants_json)
-     VALUES ((SELECT id FROM stores WHERE user_id = ?), ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [req.session.userId, category_id || null, name, description || '', image_url || '', price, original_price || null, has_discount ? 1 : 0, variants_json || null],
+    `INSERT INTO products (store_id, category_id, name, description, image_url, price, original_price, has_discount, variants_json, extras_json)
+     VALUES ((SELECT id FROM stores WHERE user_id = ?), ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [req.session.userId, category_id || null, name, description || '', image_url || '', price, original_price || null, has_discount ? 1 : 0, variants_json || null, extras_json || null],
     function (err) {
       if (err) {
         return res.status(500).json({ success: false, error: err.message });
@@ -382,7 +388,8 @@ app.post('/api/dashboard/products', ensureAuth, (req, res) => {
           }
           const parsed = {
             ...product,
-            variants: product.variants_json ? JSON.parse(product.variants_json) : []
+            variants: product.variants_json ? JSON.parse(product.variants_json) : [],
+            extras: product.extras_json ? JSON.parse(product.extras_json) : []
           };
           return res.status(201).json({ success: true, data: parsed });
         }
@@ -394,7 +401,7 @@ app.post('/api/dashboard/products', ensureAuth, (req, res) => {
 // PUT /api/dashboard/products/:id — update with ownership check
 app.put('/api/dashboard/products/:id', ensureAuth, (req, res) => {
   const { id } = req.params;
-  const { category_id, name, description, image_url, price, original_price, has_discount, variants_json } = req.body;
+  const { category_id, name, description, image_url, price, original_price, has_discount, variants_json, extras_json } = req.body;
 
   db.run(
     `UPDATE products SET
@@ -405,9 +412,10 @@ app.put('/api/dashboard/products/:id', ensureAuth, (req, res) => {
       price = ?,
       original_price = ?,
       has_discount = ?,
-      variants_json = ?
+      variants_json = ?,
+      extras_json = ?
      WHERE id = ? AND store_id = (SELECT id FROM stores WHERE user_id = ?)`,
-    [category_id || null, name, description || '', image_url || '', price, original_price || null, has_discount ? 1 : 0, variants_json || null, id, req.session.userId],
+    [category_id || null, name, description || '', image_url || '', price, original_price || null, has_discount ? 1 : 0, variants_json || null, extras_json || null, id, req.session.userId],
     function (err) {
       if (err) {
         return res.status(500).json({ success: false, error: err.message });
@@ -428,7 +436,8 @@ app.put('/api/dashboard/products/:id', ensureAuth, (req, res) => {
           }
           const parsed = {
             ...product,
-            variants: product.variants_json ? JSON.parse(product.variants_json) : []
+            variants: product.variants_json ? JSON.parse(product.variants_json) : [],
+            extras: product.extras_json ? JSON.parse(product.extras_json) : []
           };
           return res.json({ success: true, data: parsed });
         }
@@ -684,10 +693,11 @@ app.get('/api/public/store/:slug', (req, res) => {
               return res.status(500).json({ error: err.message });
             }
 
-            // Parse variants_json for each product
+            // Parse variants_json and extras_json for each product
             const parsedProducts = products.map(p => ({
               ...p,
-              variants: p.variants_json ? JSON.parse(p.variants_json) : []
+              variants: p.variants_json ? JSON.parse(p.variants_json) : [],
+              extras: p.extras_json ? JSON.parse(p.extras_json) : []
             }));
 
             return res.json({ store, categories, products: parsedProducts });
