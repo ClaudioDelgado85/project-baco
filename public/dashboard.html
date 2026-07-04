@@ -108,6 +108,47 @@
                         <input type="text" id="storeAddress" placeholder="Av. Corrientes 1234, CABA">
                     </div>
 
+                    <!-- Business Hours -->
+                    <div class="form-group">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="toggleHoursEditor()">
+                            Horarios de atención
+                            <svg id="hoursChevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transition:transform 0.2s;"><path d="M6 9l6 6 6-6"/></svg>
+                        </label>
+                        <div id="hoursEditor" style="display:none;margin-top:8px;">
+                            <div class="hours-editor">
+                                <div class="hours-day">
+                                    <span class="hours-day-label">Lunes</span>
+                                    <input type="text" id="hours-mon" placeholder="09:00 - 16:30 / 19:00 - 01:00" class="hours-input">
+                                </div>
+                                <div class="hours-day">
+                                    <span class="hours-day-label">Martes</span>
+                                    <input type="text" id="hours-tue" placeholder="09:00 - 16:30 / 19:00 - 01:00" class="hours-input">
+                                </div>
+                                <div class="hours-day">
+                                    <span class="hours-day-label">Miércoles</span>
+                                    <input type="text" id="hours-wed" placeholder="09:00 - 16:30 / 19:00 - 01:00" class="hours-input">
+                                </div>
+                                <div class="hours-day">
+                                    <span class="hours-day-label">Jueves</span>
+                                    <input type="text" id="hours-thu" placeholder="09:00 - 16:30 / 19:00 - 01:00" class="hours-input">
+                                </div>
+                                <div class="hours-day">
+                                    <span class="hours-day-label">Viernes</span>
+                                    <input type="text" id="hours-fri" placeholder="09:00 - 16:30 / 19:00 - 01:00" class="hours-input">
+                                </div>
+                                <div class="hours-day">
+                                    <span class="hours-day-label">Sábado</span>
+                                    <input type="text" id="hours-sat" placeholder="10:00 - 17:00 / 19:00 - 02:00" class="hours-input">
+                                </div>
+                                <div class="hours-day">
+                                    <span class="hours-day-label">Domingo</span>
+                                    <input type="text" id="hours-sun" placeholder="11:00 - 16:00 / 19:00 - 00:00" class="hours-input">
+                                </div>
+                                <p style="font-size:12px;color:var(--text-muted);margin-top:4px;">Formato: <code>apertura - cierre</code> o <code>turno1 / turno2</code>. Dejá vacío si no abrís.</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="form-row">
                         <div class="form-group">
                             <label for="storeWhatsapp">WhatsApp (código de área + número)</label>

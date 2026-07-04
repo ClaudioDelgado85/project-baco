@@ -57,20 +57,16 @@
     </div>
 
     <!-- HOURS -->
-    <div class="hours-section fade-in stagger-1">
+    <div class="hours-section fade-in stagger-1" id="hoursSection" style="display:none;">
         <div class="hours-card" onclick="toggleHours()">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
             <div class="hours-text">
                 <p><strong>Horario de hoy</strong></p>
-                <p>09:00 - 16:30 &nbsp;•&nbsp; 19:00 - 01:00</p>
+                <p id="todayHours"></p>
             </div>
             <svg class="hours-arrow" id="hoursArrow" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
         </div>
-        <div class="hours-detail" id="hoursDetail">
-            <p><strong>Lunes a Viernes:</strong> 09:00 - 16:30 / 19:00 - 01:00</p>
-            <p><strong>Sábados:</strong> 10:00 - 17:00 / 19:00 - 02:00</p>
-            <p><strong>Domingos:</strong> 11:00 - 16:00 / 19:00 - 00:00</p>
-        </div>
+        <div class="hours-detail" id="hoursDetail"></div>
     </div>
 
     <!-- CATEGORY NAV -->

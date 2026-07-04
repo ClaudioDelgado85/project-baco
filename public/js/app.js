@@ -108,6 +108,7 @@ async function initStore() {
 
         applyTheme(data.store.theme_id);
         renderStoreProfile(data.store);
+        renderHours(data.store.hours_json);
         renderCategories(data.categories);
         renderProducts(data.categories, data.products);
 
@@ -279,6 +280,41 @@ function checkStatus() {
 }
 
 // ===== HOURS =====
+const DAY_NAMES = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+const DAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+const DAY_LABELS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+
+function renderHours(hoursJson) {
+    const section = document.getElementById('hoursSection');
+    const todayEl = document.getElementById('todayHours');
+    const detail = document.getElementById('hoursDetail');
+    if (!section || !todayEl || !detail) return;
+
+    if (!hoursJson) { section.style.display = 'none'; return; }
+
+    let hours;
+    try { hours = typeof hoursJson === 'string' ? JSON.parse(hoursJson) : hoursJson; }
+    catch (_) { section.style.display = 'none'; return; }
+
+    const keys = Object.keys(hours);
+    if (keys.length === 0) { section.style.display = 'none'; return; }
+
+    section.style.display = 'block';
+
+    // Today's hours
+    const now = new Date();
+    const todayKey = DAY_KEYS[now.getDay()];
+    const todayStr = hours[todayKey];
+    todayEl.textContent = todayStr || 'Cerrado';
+
+    // Full detail
+    detail.innerHTML = DAY_KEYS.map((key, i) => {
+        const val = hours[key];
+        if (!val) return '';
+        return `<p><strong>${DAY_LABELS[i]}:</strong> ${val}</p>`;
+    }).filter(Boolean).join('');
+}
+
 function toggleHours() {
     const detail = document.getElementById('hoursDetail');
     const arrow = document.getElementById('hoursArrow');

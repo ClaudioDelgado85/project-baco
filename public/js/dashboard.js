@@ -447,6 +447,9 @@ async function loadSettings() {
 
     // Load theme selector
     populateThemeSelect(document.getElementById('storeTheme'), store.theme_id);
+
+    // Load hours
+    loadHours(store.hours_json);
 }
 
 document.getElementById('settingsForm').addEventListener('submit', async (e) => {
@@ -486,7 +489,8 @@ document.getElementById('settingsForm').addEventListener('submit', async (e) => 
         delivery_fee: document.getElementById('storeDeliveryFee').value ? parseInt(document.getElementById('storeDeliveryFee').value) : null,
         logo_url: logoUrl,
         cover_url: coverUrl,
-        theme_id: themeSelect ? parseInt(themeSelect.value) : 0
+        theme_id: themeSelect ? parseInt(themeSelect.value) : 0,
+        hours_json: collectHours()
     };
 
     const res = await api('/api/dashboard/store', {
@@ -503,6 +507,41 @@ document.getElementById('settingsForm').addEventListener('submit', async (e) => 
         showToast(res.error || 'Error al actualizar la tienda', 'error');
     }
 });
+
+// ===== Hours Editor =====
+function toggleHoursEditor() {
+    const editor = document.getElementById('hoursEditor');
+    const chevron = document.getElementById('hoursChevron');
+    if (!editor || !chevron) return;
+    const isOpen = editor.style.display !== 'none';
+    editor.style.display = isOpen ? 'none' : 'block';
+    chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+}
+
+function loadHours(hoursJson) {
+    if (!hoursJson) return;
+    try {
+        const h = typeof hoursJson === 'string' ? JSON.parse(hoursJson) : hoursJson;
+        const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+        days.forEach(d => {
+            const el = document.getElementById(`hours-${d}`);
+            if (el && h[d]) el.value = h[d];
+        });
+    } catch (_) { /* ignore parse errors */ }
+}
+
+function collectHours() {
+    const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+    const names = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    const h = {};
+    days.forEach((d, i) => {
+        const el = document.getElementById(`hours-${d}`);
+        if (el && el.value.trim()) {
+            h[d] = el.value.trim();
+        }
+    });
+    return Object.keys(h).length > 0 ? JSON.stringify(h) : null;
+}
 
 // ===== Theme Selector (same themes as catalog) =====
 const DASHBOARD_THEMES = [

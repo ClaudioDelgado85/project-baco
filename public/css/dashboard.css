@@ -512,6 +512,45 @@ tr:hover {
     justify-content: center;
 }
 
+/* ===== Hours Editor ===== */
+.hours-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.hours-day {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.hours-day-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    min-width: 72px;
+    flex-shrink: 0;
+}
+
+.hours-input {
+    flex: 1;
+    padding: 8px 10px;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.hours-input:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+
 /* ===== Theme Selector ===== */
 .theme-selector {
     display: flex;

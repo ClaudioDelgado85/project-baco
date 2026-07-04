@@ -88,6 +88,11 @@ db.serialize(() => {
     // Error expected if column already exists — ignore
   });
 
+  // Migration: add hours_json column
+  db.run(`ALTER TABLE stores ADD COLUMN hours_json TEXT DEFAULT NULL`, (err) => {
+    // Error expected if column already exists — ignore
+  });
+
   // Seed data for demo store 'mi-tienda' (only if it doesn't exist)
   db.run(`INSERT OR IGNORE INTO users (id, email, password_hash, tier) VALUES (999, 'demo@mi-tienda.com', '$2a$10$demohashdemohashdemohashdemohashdemohashdemohashdemo', 'standard')`);
 
@@ -503,7 +508,7 @@ app.get('/api/dashboard/store', ensureAuth, (req, res) => {
 
 // PUT /api/dashboard/store — update store settings
 app.put('/api/dashboard/store', ensureAuth, (req, res) => {
-  const { name, slug, address, whatsapp_number, instagram_url, delivery_fee, logo_url, cover_url, theme_id } = req.body;
+  const { name, slug, address, whatsapp_number, instagram_url, delivery_fee, logo_url, cover_url, theme_id, hours_json } = req.body;
 
   // If slug is being changed, check uniqueness first
   if (slug) {
@@ -535,9 +540,10 @@ app.put('/api/dashboard/store', ensureAuth, (req, res) => {
         delivery_fee = COALESCE(?, delivery_fee),
         logo_url = COALESCE(?, logo_url),
         cover_url = COALESCE(?, cover_url),
-        theme_id = COALESCE(?, theme_id)
+        theme_id = COALESCE(?, theme_id),
+        hours_json = COALESCE(?, hours_json)
        WHERE user_id = ?`,
-      [name, slug, address, whatsapp_number, instagram_url, delivery_fee, logo_url, cover_url, theme_id, req.session.userId],
+      [name, slug, address, whatsapp_number, instagram_url, delivery_fee, logo_url, cover_url, theme_id, hours_json, req.session.userId],
       function (err) {
         if (err) {
           if (err.message.includes('UNIQUE constraint failed: stores.slug')) {
