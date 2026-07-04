@@ -136,12 +136,12 @@ async function initStore() {
 function renderStoreProfile(store) {
     const heroImage = document.getElementById('heroImage');
     if (heroImage) {
-        heroImage.src = store.cover_url || store.logo_url || heroImage.src;
+        heroImage.src = store.cover_url || store.logo_url || '';
     }
 
     const profileLogo = document.querySelector('.profile-logo');
     if (profileLogo) {
-        profileLogo.src = store.logo_url || 'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Flogo_512x512?alt=media';
+        profileLogo.src = store.logo_url || '';
     }
 
     const profileName = document.querySelector('.profile-name');
