@@ -954,14 +954,15 @@ tr:last-child td { border-bottom: none; }
     align-items: center;
     gap: 16px;
     padding: 20px;
-    background: var(--bg-input, #1a1a2e);
-    border: 1px solid var(--border, #2a2a3e);
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
     border-radius: 12px;
+    color: #1a1a2e;
 }
 
 #qrCodeContainer {
     padding: 12px;
-    background: #fff;
+    background: #ffffff;
     border-radius: 8px;
     line-height: 0;
 }
@@ -975,7 +976,7 @@ tr:last-child td { border-bottom: none; }
 
 .share-hint {
     font-size: 12px;
-    color: var(--text-muted, #a0a0b8);
+    color: #666;
     text-align: center;
     line-height: 1.5;
 }
