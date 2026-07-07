@@ -501,6 +501,9 @@ async function loadSettings() {
 
     // Load hours
     loadHours(store.hours_json);
+
+    // Render share section with QR
+    renderShareSection();
 }
 
 document.getElementById('settingsForm').addEventListener('submit', async (e) => {
@@ -662,3 +665,99 @@ document.addEventListener('keydown', (e) => {
         document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
     }
 });
+
+// ===== SHARE / QR CODE =====
+function getShareUrl() {
+    if (!storeData || !storeData.slug) return '';
+    return window.location.origin + '/s/' + storeData.slug;
+}
+
+function renderShareSection() {
+    const url = getShareUrl();
+    const urlInput = document.getElementById('shareUrl');
+    if (urlInput) urlInput.value = url;
+
+    // Generate QR code
+    const qrContainer = document.getElementById('qrCodeContainer');
+    if (qrContainer) {
+        qrContainer.innerHTML = '';
+        if (url && typeof QRCode !== 'undefined') {
+            new QRCode(qrContainer, {
+                text: url,
+                width: 180,
+                height: 180,
+                colorDark: '#0f0f1a',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+    }
+}
+
+function copyShareUrl() {
+    const url = getShareUrl();
+    if (!url) return;
+    navigator.clipboard.writeText(url).then(() => {
+        const btn = document.getElementById('copyBtnText');
+        if (btn) {
+            btn.textContent = '✓ Copiado';
+            setTimeout(() => { btn.textContent = '📋 Copiar'; }, 2000);
+        }
+    }).catch(() => {
+        showToast('No se pudo copiar el enlace', 'error');
+    });
+}
+
+function shareWhatsApp() {
+    const url = getShareUrl();
+    if (!url) return;
+    const storeName = storeData?.name || 'Mi tienda';
+    const text = `Mirá el menú de ${storeName}: ${url}`;
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+}
+
+function shareNative() {
+    const url = getShareUrl();
+    if (!url) return;
+    const storeName = storeData?.name || 'Mi tienda';
+    if (navigator.share) {
+        navigator.share({
+            title: storeName,
+            text: `Mirá el menú de ${storeName}`,
+            url: url
+        }).catch(() => {});
+    } else {
+        // Fallback: copy to clipboard
+        copyShareUrl();
+        showToast('Enlace copiado al portapapeles');
+    }
+}
+
+function downloadQR() {
+    const qrImg = document.querySelector('#qrCodeContainer img');
+    const qrCanvas = document.querySelector('#qrCodeContainer canvas');
+    if (!qrImg && !qrCanvas) {
+        showToast('El QR todavía no se generó', 'error');
+        return;
+    }
+
+    let dataUrl;
+    if (qrCanvas) {
+        dataUrl = qrCanvas.toDataURL('image/png');
+    } else if (qrImg) {
+        // qrcodejs creates an img element - draw it to canvas to download
+        const canvas = document.createElement('canvas');
+        canvas.width = qrImg.width;
+        canvas.height = qrImg.height;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(qrImg, 0, 0);
+        dataUrl = canvas.toDataURL('image/png');
+    }
+
+    const link = document.createElement('a');
+    link.download = `qr-${storeData?.slug || 'menu'}.png`;
+    link.href = dataUrl;
+    link.click();
+}
