@@ -915,10 +915,10 @@ tr:last-child td { border-bottom: none; }
     flex: 1;
     min-width: 0;
     padding: 10px 12px;
-    background: var(--bg-input, #1a1a2e);
-    border: 1px solid var(--border, #2a2a3e);
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
     border-radius: 8px;
-    color: var(--text, #fff);
+    color: #333;
     font-size: 13px;
     font-family: inherit;
 }
@@ -934,10 +934,10 @@ tr:last-child td { border-bottom: none; }
     align-items: center;
     gap: 8px;
     padding: 10px 16px;
-    background: var(--bg-input, #1a1a2e);
-    border: 1px solid var(--border, #2a2a3e);
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
     border-radius: 8px;
-    color: var(--text, #fff);
+    color: #333;
     cursor: pointer;
     font-size: 14px;
     font-weight: 500;
