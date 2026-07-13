@@ -109,6 +109,7 @@ async function initStore() {
         renderHours(data.store.hours_json);
         renderCategories(data.categories);
         renderProducts(data.categories, data.products);
+        checkStatus(data.store.hours_json);
 
         // Hide loading overlay — everything is now rendered
         const overlay = document.getElementById('loadingOverlay');
@@ -269,19 +270,68 @@ function renderProductCard(p, idx) {
 }
 
 // ===== STATUS =====
-function checkStatus() {
+function checkStatus(hoursJson) {
     const badge = document.getElementById('statusBadge');
     const text = document.getElementById('statusText');
     if (!badge || !text) return;
+
     const now = new Date();
-    const hour = now.getHours();
-    const min = now.getMinutes();
-    const time = hour * 100 + min;
-    const isOpen = (time >= 900 && time <= 1630) || (time >= 1900 && time <= 100);
-    if (isOpen) {
+    const dayKey = DAY_KEYS[now.getDay()];
+    const currentMins = now.getHours() * 60 + now.getMinutes();
+
+    let hours = null;
+    if (hoursJson) {
+        try {
+            const parsed = typeof hoursJson === 'string'
+                ? JSON.parse(hoursJson)
+                : hoursJson;
+            hours = parsed[dayKey];
+        } catch (_) { hours = null; }
+    }
+
+    if (!hours) return;
+
+    if (isStoreOpen(hours, currentMins)) {
         badge.classList.add('open');
         text.textContent = 'ABIERTO';
     }
+}
+
+/**
+ * Parses a day's hours string and checks if the store is currently open.
+ * Supports formats:
+ *   "09:00 - 16:30"
+ *   "19:00 - 01:00"   (crosses midnight)
+ *   "09:00 - 16:30 / 19:00 - 01:00"  (double shift)
+ */
+function isStoreOpen(hoursStr, currentMins) {
+    if (!hoursStr) return false;
+
+    // Split by "/" to handle multiple shifts
+    const shifts = hoursStr.split('/').map(s => s.trim()).filter(Boolean);
+
+    for (const shift of shifts) {
+        // Match "HH:MM - HH:MM" (flexible whitespace and dash variants)
+        const m = shift.match(/(\d{1,2}):(\d{2})\s*[-–]\s*(\d{1,2}):(\d{2})/);
+        if (!m) continue;
+
+        const startMins = parseInt(m[1]) * 60 + parseInt(m[2]);
+        let endMins = parseInt(m[3]) * 60 + parseInt(m[4]);
+
+        // If endMins <= startMins, the shift crosses midnight (e.g., 19:00 - 01:00)
+        if (endMins <= startMins) {
+            // Open if now >= start OR now < end (i.e., after midnight)
+            if (currentMins >= startMins || currentMins < endMins) {
+                return true;
+            }
+        } else {
+            // Normal shift (e.g., 09:00 - 16:30)
+            if (currentMins >= startMins && currentMins < endMins) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 // ===== HOURS =====
@@ -693,7 +743,6 @@ function showToast(msg) {
 }
 
 // ===== INIT =====
-checkStatus();
 updateCart();
 
 // Parallax hero
