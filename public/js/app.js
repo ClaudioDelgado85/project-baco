@@ -393,6 +393,10 @@ function openProductModal(id) {
     const p = storeData.products.find(prod => prod.id === id);
     if (!p) return;
     currentProduct = { ...p };
+    if (currentProduct.variants && currentProduct.variants.length > 0) {
+        // Inyectamos la opción Base al principio para que los índices coincidan
+        currentProduct.variants = [{ name: 'Base', price: currentProduct.price }, ...currentProduct.variants];
+    }
     currentVariant = 0;
     modalQty = 1;
     selectedExtras = [];
@@ -409,7 +413,11 @@ function openProductModal(id) {
     const variantContainer = document.getElementById('variantOptions');
     if (p.variants && p.variants.length > 0) {
         document.getElementById('modalVariants').style.display = 'block';
-        variantContainer.innerHTML = p.variants.map((v, i) => `
+        
+        // Include base product price as a selectable option if variants exist
+        const allOptions = [{ name: 'Base', price: p.price }, ...p.variants];
+        
+        variantContainer.innerHTML = allOptions.map((v, i) => `
             <div class="selector-option ${i === 0 ? 'selected' : ''}" onclick="selectVariant(${i}, this)">
                 <span class="option-name">${v.name}</span>
                 <div style="display:flex;align-items:center;gap:10px">
