@@ -632,7 +632,7 @@ function updateCart() {
 }
 
 function changeCartQty(index, delta) {
-    cart[index].qty = Math.max(1, cart[index].qty + delta);
+    cart[index].qty += delta;
     if (cart[index].qty <= 0) {
         cart.splice(index, 1);
     }
