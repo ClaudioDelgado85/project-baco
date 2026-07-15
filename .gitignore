@@ -6,3 +6,4 @@ saas.db-journal
 *.log
 public/uploads/*
 !public/uploads/.gitkeep
+*.stackdump
