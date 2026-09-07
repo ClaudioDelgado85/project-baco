@@ -150,10 +150,15 @@ function renderCategories() {
     }
     if (empty) empty.style.display = 'none';
 
-    tbody.innerHTML = categories.map(c => `
+    tbody.innerHTML = categories.map((c, i) => `
         <tr>
             <td data-label="Nombre">${escapeHtml(c.name)}</td>
-            <td data-label="Orden">${c.order_index || 0}</td>
+            <td data-label="Orden">
+                <div style="display:flex;gap:4px;align-items:center;">
+                    <button class="btn btn-secondary btn-sm" onclick="moveCategory(${c.id}, -1)" ${i === 0 ? 'disabled' : ''} title="Subir">↑</button>
+                    <button class="btn btn-secondary btn-sm" onclick="moveCategory(${c.id}, 1)" ${i === categories.length - 1 ? 'disabled' : ''} title="Bajar">↓</button>
+                </div>
+            </td>
             <td class="actions-cell" data-label="">
                 <button class="btn btn-secondary btn-sm" onclick="editCategory(${c.id})">Editar</button>
                 <button class="btn btn-danger btn-sm" onclick="deleteCategory(${c.id})">Eliminar</button>
@@ -182,6 +187,37 @@ function editCategory(id) {
     const cat = categories.find(c => c.id === id);
     if (!cat) return;
     openCategoryModal(cat);
+}
+
+// ===== Category Reorder =====
+async function moveCategory(id, direction) {
+    const index = categories.findIndex(c => c.id === id);
+    if (index === -1) return;
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= categories.length) return;
+
+    // Reorder locally, then persist positional order_index for the whole list.
+    // Swapping the two stored values is a no-op when both categories share the
+    // same order_index (new categories default to 0), so positions are written
+    // for every category instead.
+    const reordered = [...categories];
+    [reordered[index], reordered[targetIndex]] = [reordered[targetIndex], reordered[index]];
+
+    const results = await Promise.all(reordered.map((c, i) =>
+        api(`/api/dashboard/categories/${c.id}`, { method: 'PUT', body: { order_index: i } })
+    ));
+
+    if (results.every(r => r.success)) {
+        // Reload categories from server (source of truth)
+        const fresh = await api('/api/dashboard/categories');
+        if (fresh.success) {
+            categories = fresh.data;
+            renderCategories();
+        }
+        showToast('Orden actualizado');
+    } else {
+        showToast('Error al reordenar', 'error');
+    }
 }
 
 // ===== Category Save =====
