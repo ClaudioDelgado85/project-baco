@@ -93,6 +93,11 @@ db.serialize(() => {
     // Error expected if column already exists — ignore
   });
 
+  // Migration: add subscription_expires_at column (manual-subscriptions; expiry date only — status is derived at read time, never persisted)
+  db.run(`ALTER TABLE stores ADD COLUMN subscription_expires_at TEXT`, (err) => {
+    // Error expected if column already exists — ignore
+  });
+
   // Migration: add extras_json column
   db.run(`ALTER TABLE products ADD COLUMN extras_json TEXT DEFAULT NULL`, (err) => {
     // Error expected if column already exists — ignore
@@ -190,7 +195,7 @@ app.post(['/api/auth/signup', '/api/auth/register'], async (req, res) => {
           const userId = this.lastID;
 
           db.run(
-            'INSERT INTO stores (user_id, slug, name) VALUES (?, ?, ?)',
+            'INSERT INTO stores (user_id, slug, name, subscription_expires_at) VALUES (?, ?, ?, datetime(\'now\', \'+14 days\'))',
             [userId, slug, storeName],
             function (err) {
               if (err) {
@@ -321,6 +326,55 @@ function ensureAuth(req, res, next) {
     return res.status(401).json({ success: false, error: 'Unauthorized' });
   }
   next();
+}
+
+// ===== Subscription helpers (manual-subscriptions) =====
+// Dates are stored in SQLite UTC format 'YYYY-MM-DD HH:MM:SS' (same as created_at).
+// Status is always derived at read time — never persisted.
+
+// Parse a SQLite UTC datetime string into epoch ms via Date.UTC.
+// new Date('YYYY-MM-DD HH:MM:SS') is not spec-safe across engines, so we parse manually.
+function parseSqliteUTC(s) {
+  if (typeof s !== 'string') return null;
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})/);
+  if (!m) return null;
+  const [year, month, day, hour, minute, second] = m.slice(1).map(Number);
+  if (month < 1 || month > 12 || day < 1 || day > 31 || hour > 23 || minute > 59 || second > 59) return null;
+  const epoch = Date.UTC(year, month - 1, day, hour, minute, second);
+  return Number.isNaN(epoch) ? null : epoch;
+}
+
+// Deliberate fail-open: NULL, missing, or malformed expiry means the store is NOT expired.
+function isStoreExpired(store) {
+  if (!store || !store.subscription_expires_at) return false;
+  const expiry = parseSqliteUTC(store.subscription_expires_at);
+  if (expiry === null) {
+    console.warn(`isStoreExpired: malformed subscription_expires_at "${store.subscription_expires_at}" for store id ${store.id} — treating as not expired (fail-open)`);
+    return false;
+  }
+  return expiry <= Date.now();
+}
+
+// Derive the subscription state from the store row. Payload contract:
+// { status: 'active'|'warning'|'expired', days_remaining: number|null, expires_at: string|null, admin_whatsapp: string|null }
+// expires null/malformed -> active with days_remaining null; expired -> 0 days; <=3 days -> warning.
+function getSubscription(store) {
+  const adminWhatsapp = process.env.ADMIN_WHATSAPP || null;
+  const expiresAt = store ? store.subscription_expires_at : null;
+  if (!expiresAt) {
+    return { status: 'active', days_remaining: null, expires_at: null, admin_whatsapp: adminWhatsapp };
+  }
+  const expiry = parseSqliteUTC(expiresAt);
+  if (expiry === null) {
+    return { status: 'active', days_remaining: null, expires_at: null, admin_whatsapp: adminWhatsapp };
+  }
+  const msRemaining = expiry - Date.now();
+  if (msRemaining <= 0) {
+    return { status: 'expired', days_remaining: 0, expires_at: expiresAt, admin_whatsapp: adminWhatsapp };
+  }
+  const daysRemaining = Math.ceil(msRemaining / (24 * 60 * 60 * 1000));
+  const status = daysRemaining <= 3 ? 'warning' : 'active';
+  return { status, days_remaining: daysRemaining, expires_at: expiresAt, admin_whatsapp: adminWhatsapp };
 }
 
 // Auth pages — serve HTML directly (no session required)
@@ -510,7 +564,8 @@ app.get('/api/dashboard/store', ensureAuth, (req, res) => {
       if (!store) {
         return res.status(404).json({ success: false, error: 'Store not found' });
       }
-      return res.json({ success: true, data: store });
+      // Subscription state is derived at read time; the dashboard itself is never gated by expiry
+      return res.json({ success: true, data: { ...store, subscription: getSubscription(store) } });
     }
   );
 });
@@ -662,7 +717,21 @@ app.get('/api/dashboard/summary', (req, res) => {
 
 // Public store page route — must be BEFORE static middleware
 app.get('/s/:slug', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  const { slug } = req.params;
+
+  db.get('SELECT * FROM stores WHERE slug = ?', [slug], (err, store) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    // Not found: serve index.html unchanged — app.js shows the "Tienda no encontrada" message
+    if (store && isStoreExpired(store)) {
+      return res.status(404).send(
+        '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Tienda no disponible</title></head>' +
+        '<body><div style="padding:2rem;text-align:center;font-family:sans-serif;"><h2>Tienda temporalmente no disponible</h2><p>El catálogo de esta tienda no está disponible en este momento.</p></div></body></html>'
+      );
+    }
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  });
 });
 
 // Public store API — returns store data, categories, and products
@@ -675,6 +744,9 @@ app.get('/api/public/store/:slug', (req, res) => {
     }
     if (!store) {
       return res.status(404).json({ error: 'Store not found' });
+    }
+    if (isStoreExpired(store)) {
+      return res.status(403).json({ success: false, error: 'store_expired' });
     }
 
     db.all(

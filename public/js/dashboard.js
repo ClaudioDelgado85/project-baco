@@ -85,6 +85,38 @@ function switchTab(tab) {
     if (tab === 'settings') loadSettings();
 }
 
+// ===== Subscription Banner =====
+function renderSubscriptionBanner(sub) {
+    const banner = document.getElementById('subscriptionBanner');
+    if (!banner || !sub) return;
+
+    // Reset variant classes, then apply the derived status
+    banner.classList.remove('active', 'warning', 'expired');
+    banner.style.display = 'none';
+
+    const setBanner = (variant, text, whatsappUrl) => {
+        banner.className = `sub-banner ${variant}`;
+        banner.style.display = 'block';
+        if (whatsappUrl) {
+            banner.innerHTML = `${escapeHtml(text)} <a class="sub-banner-cta" href="${whatsappUrl}" target="_blank" rel="noopener">Contactanos</a>`;
+        } else {
+            banner.textContent = text;
+        }
+    };
+
+    if (sub.status === 'expired') {
+        const cta = sub.admin_whatsapp ? `https://api.whatsapp.com/send?phone=${encodeURIComponent(sub.admin_whatsapp)}` : null;
+        setBanner('expired', 'Suscripción vencida — tu menú está desactivado', cta);
+    } else if (sub.status === 'warning') {
+        const cta = sub.admin_whatsapp ? `https://api.whatsapp.com/send?phone=${encodeURIComponent(sub.admin_whatsapp)}` : null;
+        setBanner('warning', `Se vence en ${sub.days_remaining} ${sub.days_remaining === 1 ? 'día' : 'días'} — contactanos para renovar`, cta);
+    } else if (sub.days_remaining === null) {
+        setBanner('active', 'Suscripción sin fecha de vencimiento');
+    } else {
+        setBanner('active', `Te quedan ${sub.days_remaining} ${sub.days_remaining === 1 ? 'día' : 'días'} de suscripción`);
+    }
+}
+
 // ===== Init =====
 document.addEventListener('DOMContentLoaded', async () => {
     // Check auth
@@ -98,7 +130,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         api('/api/dashboard/categories')
     ]);
 
-    if (storeRes.success) storeData = storeRes.data;
+    if (storeRes.success) {
+        storeData = storeRes.data;
+        if (storeRes.data.subscription) renderSubscriptionBanner(storeRes.data.subscription);
+    }
     if (productsRes.success) products = productsRes.data;
     if (categoriesRes.success) categories = categoriesRes.data;
 
@@ -523,6 +558,7 @@ async function loadSettings() {
 
     const store = res.data;
     storeData = store;
+    if (store.subscription) renderSubscriptionBanner(store.subscription);
     document.getElementById('storeName').value = store.name || '';
     document.getElementById('storeSlug').value = store.slug || '';
     document.getElementById('storeAddress').value = store.address || '';

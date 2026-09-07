@@ -98,6 +98,13 @@ async function initStore() {
 
     try {
         const res = await fetch(`/api/public/store/${slug}`);
+        if (res.status === 403) {
+            // Subscription expired — show unavailable message instead of the catalog
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) overlay.style.display = 'none';
+            document.body.innerHTML = '<div style="padding:2rem;text-align:center;font-family:sans-serif;"><h2>Tienda temporalmente no disponible</h2><p>El catálogo de esta tienda no está disponible en este momento.</p></div>';
+            return;
+        }
         if (!res.ok) {
             throw new Error('Store not found');
         }
