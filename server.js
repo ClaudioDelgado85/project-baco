@@ -127,6 +127,29 @@ db.serialize(() => {
       'https://firebasestorage.googleapis.com/v0/b/dondepido-befab.appspot.com/o/ZDChn584ZuhyipCDFBF5%2Fproducts%2Ffa781025-492d-465d-bfc2-332c9b40a32d_500x500?alt=media',
       450, NULL, 0, NULL, 0)`);
 
+  // Seed admin user from env (manual-subscriptions): only when both ADMIN_EMAIL and ADMIN_PASSWORD
+  // are set. Idempotent — if the email already exists (any tier) it is never overwritten.
+  if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) {
+    db.get('SELECT id FROM users WHERE email = ?', [process.env.ADMIN_EMAIL], (err, row) => {
+      if (err) {
+        console.error('seedAdminUser: could not look up admin user:', err.message);
+        return;
+      }
+      if (row) return; // already exists — never overwrite
+      db.run(
+        'INSERT INTO users (email, password_hash, tier) VALUES (?, ?, ?)',
+        [process.env.ADMIN_EMAIL, bcrypt.hashSync(process.env.ADMIN_PASSWORD, 10), 'admin'],
+        (insertErr) => {
+          if (insertErr) {
+            console.error('seedAdminUser: could not create admin user:', insertErr.message);
+            return;
+          }
+          console.log(`Admin user created: ${process.env.ADMIN_EMAIL}`);
+        }
+      );
+    });
+  }
+
   console.log('Database tables initialized.');
 });
 
@@ -328,6 +351,28 @@ function ensureAuth(req, res, next) {
   next();
 }
 
+// Admin middleware (manual-subscriptions): no session -> 401; session but tier !== 'admin' -> 403.
+// Tier is re-checked in the DB on every request — session data alone is not trusted (design D8),
+// so tier changes apply without re-login.
+function requireAdmin(req, res, next) {
+  if (!req.session.userId) {
+    return res.status(401).json({ success: false, error: 'Unauthorized' });
+  }
+  db.get('SELECT email, tier FROM users WHERE id = ?', [req.session.userId], (err, user) => {
+    if (err) {
+      return res.status(500).json({ success: false, error: err.message });
+    }
+    if (!user) {
+      return res.status(401).json({ success: false, error: 'Unauthorized' });
+    }
+    if (user.tier !== 'admin') {
+      return res.status(403).json({ success: false, error: 'Admin access required' });
+    }
+    req.adminUser = user;
+    next();
+  });
+}
+
 // ===== Subscription helpers (manual-subscriptions) =====
 // Dates are stored in SQLite UTC format 'YYYY-MM-DD HH:MM:SS' (same as created_at).
 // Status is always derived at read time — never persisted.
@@ -376,6 +421,117 @@ function getSubscription(store) {
   const status = daysRemaining <= 3 ? 'warning' : 'active';
   return { status, days_remaining: daysRemaining, expires_at: expiresAt, admin_whatsapp: adminWhatsapp };
 }
+
+// ===== Admin routes (manual-subscriptions) =====
+// /admin is served unconditionally (design D5): the single page shows an inline login form
+// when there is no admin session; the client resolves login vs panel via the API's 401/403.
+
+// Admin panel page — public HTML; the real gate is requireAdmin on every /api/admin/* route
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+// Admin login — separate from /api/auth/login: valid credentials of a non-admin user
+// are explicitly rejected (403), a merchant session must never reach the panel.
+app.post('/api/admin/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ success: false, error: 'Email and password are required' });
+  }
+
+  db.get(
+    'SELECT id, email, password_hash, tier FROM users WHERE email = ?',
+    [email],
+    async (err, user) => {
+      if (err) {
+        return res.status(500).json({ success: false, error: err.message });
+      }
+      if (!user) {
+        return res.status(401).json({ success: false, error: 'Invalid email or password' });
+      }
+
+      try {
+        const match = await bcrypt.compare(password, user.password_hash);
+        if (!match) {
+          return res.status(401).json({ success: false, error: 'Invalid email or password' });
+        }
+        if (user.tier !== 'admin') {
+          return res.status(403).json({ success: false, error: 'Admin access required' });
+        }
+
+        req.session.userId = user.id;
+        req.session.userEmail = user.email;
+        return res.json({ success: true, user: { id: user.id, email: user.email, tier: user.tier } });
+      } catch (error) {
+        return res.status(500).json({ success: false, error: error.message });
+      }
+    }
+  );
+});
+
+// Admin logout — same shape as /api/auth/logout
+app.post('/api/admin/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ success: false, error: 'Could not log out' });
+    }
+    res.clearCookie('connect.sid');
+    return res.json({ success: true, message: 'Logged out successfully' });
+  });
+});
+
+// Admin session check — lets the frontend know whether a valid admin session already exists
+app.get('/api/admin/session', requireAdmin, (req, res) => {
+  return res.json({ success: true, email: req.adminUser.email });
+});
+
+// Admin stores list — all stores with derived subscription state, owner email included.
+// Ordering: most urgent expiry first (expired, then warning/active by nearest expiry); NULL last.
+app.get('/api/admin/stores', requireAdmin, (req, res) => {
+  db.all(
+    `SELECT s.id, s.name, s.slug, s.user_id, s.created_at, s.subscription_expires_at, u.email AS owner_email
+     FROM stores s LEFT JOIN users u ON s.user_id = u.id`,
+    (err, stores) => {
+      if (err) {
+        return res.status(500).json({ success: false, error: err.message });
+      }
+
+      const rows = stores.map(store => {
+        const subscription = getSubscription(store);
+        // A store with NULL/malformed expiry has no active subscription track (test/legacy accounts) —
+        // report it as 'inactive' with days_remaining null instead of the owner-facing 'active'.
+        const status = subscription.status === 'active' && subscription.days_remaining === null
+          ? 'inactive'
+          : subscription.status;
+        return {
+          id: store.id,
+          name: store.name,
+          slug: store.slug,
+          user_id: store.user_id,
+          owner_email: store.owner_email,
+          created_at: store.created_at,
+          subscription_expires_at: store.subscription_expires_at,
+          subscription: { ...subscription, status }
+        };
+      });
+
+      // Sort: expiry ascending, NULL last — expired stores (past dates) come out first,
+      // then warning, then active by nearest expiry (tasks T4.4).
+      const expiryEpoch = (row) => parseSqliteUTC(row.subscription_expires_at);
+      rows.sort((a, b) => {
+        const ea = expiryEpoch(a);
+        const eb = expiryEpoch(b);
+        if (ea === null && eb === null) return 0;
+        if (ea === null) return 1; // NULL/malformed last
+        if (eb === null) return -1;
+        return ea - eb;
+      });
+
+      return res.json({ success: true, data: rows });
+    }
+  );
+});
 
 // Auth pages — serve HTML directly (no session required)
 app.get('/login', (req, res) => {

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin — YaMenu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <!-- Inline login (shown when there is no admin session; hidden once authenticated) -->
+    <div id="adminLogin" class="admin-login" style="display:none;">
+        <div class="login-card">
+            <div class="login-logo">
+                <h1>Panel Admin</h1>
+                <p>Iniciá sesión con tu cuenta de administrador</p>
+            </div>
+
+            <div class="login-error" id="loginError"></div>
+
+            <form id="adminLoginForm" novalidate>
+                <div class="form-group">
+                    <label for="adminEmail">Email</label>
+                    <input type="email" id="adminEmail" placeholder="admin@yamenu.com" autocomplete="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="adminPassword">Contraseña</label>
+                    <input type="password" id="adminPassword" placeholder="••••••" autocomplete="current-password" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary login-submit" id="loginSubmitBtn">Iniciar sesión</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin panel (shown only with a valid admin session) -->
+    <div id="adminPanel" style="display:none;">
+        <header class="topbar">
+            <div class="topbar-brand">YaMenu · Panel Admin</div>
+            <nav class="topbar-nav">
+            </nav>
+            <div class="topbar-right">
+                <span class="admin-email" id="adminEmailLabel"></span>
+                <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <section class="panel active" id="storesPanel">
+                <div class="panel-header">
+                    <div>
+                        <h2 class="panel-title">Tiendas</h2>
+                        <p class="panel-subtitle">Estado de suscripción de todas las tiendas</p>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tienda</th>
+                                <th>Slug</th>
+                                <th>Email dueño</th>
+                                <th>Estado</th>
+                                <th>Vence</th>
+                                <th>Días restantes</th>
+                                <th style="width:120px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="storesTableBody"></tbody>
+                    </table>
+                    <div class="empty-state" id="storesEmpty" style="display:none;">
+                        <p>No hay tiendas registradas.</p>
+                    </div>
+                    <div class="empty-state" id="storesLoading" style="display:none;">
+                        <p>Cargando tiendas...</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="/js/admin.js"></script>
+</body>
+</html>
