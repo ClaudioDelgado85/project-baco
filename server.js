@@ -533,6 +533,56 @@ app.get('/api/admin/stores', requireAdmin, (req, res) => {
   );
 });
 
+// Manual activation (manual-subscriptions T4.5): extends the store's subscription by N days.
+// Pure SQL date math (design D1) — no JS Date on the server:
+//   - base = MAX(now, current_expiry) — an expired store restarts from now, an active one accumulates
+//   - IFNULL handles stores with NULL expiry (legacy/test accounts): they start from now
+//     (scalar MAX(x, NULL) returns NULL, unlike the aggregate — verified against the real DB)
+//   - new expiry = base + N days, still SQLite UTC 'YYYY-MM-DD HH:MM:SS' (lexical compare safe)
+app.post('/api/admin/stores/:id/activate', requireAdmin, (req, res) => {
+  const storeId = req.params.id;
+  const days = req.body ? req.body.days : undefined;
+
+  if (!Number.isInteger(days) || days < 1 || days > 365) {
+    return res.status(400).json({ success: false, error: 'Days must be an integer between 1 and 365' });
+  }
+
+  db.run(
+    `UPDATE stores SET subscription_expires_at =
+       datetime(MAX(datetime('now'), IFNULL(subscription_expires_at, datetime('now'))), '+' || ? || ' days')
+     WHERE id = ?`,
+    [days, storeId],
+    function (err) {
+      if (err) {
+        return res.status(500).json({ success: false, error: err.message });
+      }
+      if (this.changes === 0) {
+        return res.status(404).json({ success: false, error: 'Store not found' });
+      }
+
+      db.get('SELECT * FROM stores WHERE id = ?', [storeId], (err2, store) => {
+        if (err2) {
+          return res.status(500).json({ success: false, error: err2.message });
+        }
+        if (!store) {
+          return res.status(404).json({ success: false, error: 'Store not found' });
+        }
+        const subscription = getSubscription(store);
+        return res.json({
+          success: true,
+          data: {
+            id: store.id,
+            name: store.name,
+            slug: store.slug,
+            subscription_expires_at: store.subscription_expires_at,
+            subscription
+          }
+        });
+      });
+    }
+  );
+});
+
 // Auth pages — serve HTML directly (no session required)
 app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'login.html'));

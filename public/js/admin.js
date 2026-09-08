@@ -1,5 +1,7 @@
 // ===== Admin Panel State =====
 let stores = [];
+let currentFilter = 'all'; // 'all' | 'expiring' (PR3: "Vencidas y por vencer" filter)
+let activateStoreId = null; // store id pending activation in the modal
 
 // ===== Toast System (same pattern as dashboard.js) =====
 function showToast(message, type = 'success') {
@@ -144,17 +146,49 @@ const STATUS_LABELS = {
     inactive: 'Sin fecha'
 };
 
+// "Vencidas y por vencer": expired, or expiring soon (<=3 days left).
+// Inactive stores (NULL expiry, no subscription track) are excluded — they have nothing expiring.
+function isExpiringSoon(store) {
+    const sub = store.subscription || {};
+    if (sub.status === 'expired') return true;
+    return sub.days_remaining !== null && sub.days_remaining !== undefined && sub.days_remaining <= 3;
+}
+
+function getVisibleStores() {
+    if (currentFilter === 'all') return stores;
+    return stores.filter(isExpiringSoon);
+}
+
+// Filter toggle buttons ("Todas" / "Vencidas y por vencer") — client-side, no reload
+function setFilter(filter) {
+    currentFilter = filter;
+    document.getElementById('filterAllBtn').classList.toggle('active', filter === 'all');
+    document.getElementById('filterExpiringBtn').classList.toggle('active', filter === 'expiring');
+    renderStores();
+}
+
 function renderStores() {
     const tbody = document.getElementById('storesTableBody');
     const empty = document.getElementById('storesEmpty');
+    const countEl = document.getElementById('storesCount');
     tbody.innerHTML = '';
 
-    if (!stores.length) {
-        empty.style.display = 'block';
-        return;
+    const visible = getVisibleStores();
+
+    if (countEl) {
+        countEl.textContent = visible.length === 1 ? '1 tienda' : `${visible.length} tiendas`;
     }
 
-    for (const store of stores) {
+    if (!visible.length) {
+        empty.style.display = 'block';
+        empty.querySelector('p').textContent = currentFilter === 'expiring'
+            ? 'No hay tiendas vencidas ni por vencer.'
+            : 'No hay tiendas registradas.';
+        return;
+    }
+    empty.style.display = 'none';
+
+    for (const store of visible) {
         const sub = store.subscription || {};
         const status = sub.status || 'inactive';
         const label = STATUS_LABELS[status] || status;
@@ -165,7 +199,7 @@ function renderStores() {
             : (days === null || days === undefined ? '—' : String(days));
 
         const tr = document.createElement('tr');
-        // Red highlight: expired or <=3 days left (design R8; filter arrives in PR3)
+        // Red highlight: expired or <=3 days left (design R8)
         if (status === 'expired' || (days !== null && days !== undefined && days <= 3)) {
             tr.className = 'row-danger';
         }
@@ -177,11 +211,94 @@ function renderStores() {
             <td data-label="Estado"><span class="status-chip ${status}">${label}</span></td>
             <td data-label="Vence">${escapeHtml(expiresAt)}</td>
             <td data-label="Días restantes">${daysText}</td>
-            <td class="actions-cell"><button class="btn btn-secondary btn-sm" disabled title="Disponible próximamente">Activar</button></td>
+            <td class="actions-cell"><button class="btn btn-secondary btn-sm" data-store-id="${store.id}" onclick="openActivateModal(this.dataset.storeId)">Activar</button></td>
         `;
         tbody.appendChild(tr);
     }
 }
+
+// ===== Activation Modal (PR3 — T5.5) =====
+function openActivateModal(storeId) {
+    const store = stores.find(s => String(s.id) === String(storeId));
+    if (!store) return;
+
+    activateStoreId = store.id;
+    document.getElementById('activateStoreName').textContent = store.name || '';
+    document.getElementById('activateCurrentExpiry').textContent = store.subscription && store.subscription.expires_at
+        ? `Vence: ${store.subscription.expires_at} (quedan ${store.subscription.days_remaining ?? 0} días)`
+        : 'Esta tienda no tiene fecha de vencimiento (sin suscripción activa).';
+    document.getElementById('activateDaysInput').value = '';
+    document.getElementById('activateModal').classList.add('open');
+    document.getElementById('activateDaysInput').focus();
+}
+
+function closeActivateModal() {
+    activateStoreId = null;
+    document.getElementById('activateModal').classList.remove('open');
+}
+
+async function confirmActivation() {
+    if (activateStoreId === null) return;
+
+    const daysInput = document.getElementById('activateDaysInput').value;
+    const days = Number(daysInput);
+
+    if (!daysInput || !Number.isInteger(days) || days < 1 || days > 365) {
+        showToast('Los días deben ser un entero entre 1 y 365', 'error');
+        return;
+    }
+
+    const btn = document.getElementById('activateConfirmBtn');
+    btn.disabled = true;
+    btn.textContent = 'Activando...';
+
+    try {
+        const res = await fetch(`/api/admin/stores/${activateStoreId}/activate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ days })
+        });
+        const data = await res.json();
+
+        if (res.status === 401 || res.status === 403) {
+            // Session expired/revoked — close modal and go back to login
+            closeActivateModal();
+            showLogin();
+            return;
+        }
+
+        if (res.ok && data.success) {
+            const expiresAt = data.data?.subscription?.expires_at || data.data?.subscription_expires_at;
+            showToast(`Tienda activada hasta ${expiresAt}`, 'success');
+            closeActivateModal();
+            await loadStores();
+        } else {
+            showToast(data.error || 'Error al activar la tienda', 'error');
+        }
+    } catch (err) {
+        showToast('Error de conexión al activar la tienda', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Confirmar';
+    }
+}
+
+// ===== Modal click outside + Escape (same pattern as dashboard.js) =====
+document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal-overlay')) {
+        e.target.classList.remove('open');
+        if (e.target.id === 'activateModal') activateStoreId = null;
+    }
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const modal = document.getElementById('activateModal');
+        if (modal && modal.classList.contains('open')) {
+            closeActivateModal();
+        }
+    }
+});
 
 // ===== Init =====
 document.getElementById('adminLoginForm').addEventListener('submit', login);
