@@ -933,7 +933,12 @@ app.get('/s/:slug', (req, res) => {
     if (store && isStoreExpired(store)) {
       return res.status(404).send(
         '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Tienda no disponible</title></head>' +
-        '<body><div style="padding:2rem;text-align:center;font-family:sans-serif;"><h2>Tienda temporalmente no disponible</h2><p>El catálogo de esta tienda no está disponible en este momento.</p></div></body></html>'
+        '<body style="margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0f0f1a;font-family:\'Inter\',sans-serif;">' +
+        '<div style="padding:2rem;text-align:center;max-width:400px;">' +
+        '<img src="/images/store-unavailable.webp" alt="Tienda no disponible" style="width:100%;max-width:280px;border-radius:16px;display:block;margin:0 auto 1.5rem auto;">' +
+        '<h2 style="color:#fff;font-size:1.4rem;margin:0 0 0.5rem 0;">Tienda temporalmente no disponible</h2>' +
+        '<p style="color:#a0a0b8;font-size:0.95rem;margin:0;line-height:1.5;">El catálogo de esta tienda no está disponible en este momento.</p>' +
+        '</div></body></html>'
       );
     }
     res.sendFile(path.join(__dirname, 'public', 'index.html'));

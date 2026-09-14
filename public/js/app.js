@@ -102,7 +102,7 @@ async function initStore() {
             // Subscription expired — show unavailable message instead of the catalog
             const overlay = document.getElementById('loadingOverlay');
             if (overlay) overlay.style.display = 'none';
-            document.body.innerHTML = '<div style="padding:2rem;text-align:center;font-family:sans-serif;"><h2>Tienda temporalmente no disponible</h2><p>El catálogo de esta tienda no está disponible en este momento.</p></div>';
+            document.body.innerHTML = '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0f0f1a;font-family:sans-serif;"><div style="padding:2rem;text-align:center;max-width:400px;"><img src="/images/store-unavailable.webp" alt="Tienda no disponible" style="width:100%;max-width:280px;border-radius:16px;display:block;margin:0 auto 1.5rem auto;"><h2 style="color:#fff;font-size:1.4rem;margin:0 0 0.5rem 0;">Tienda temporalmente no disponible</h2><p style="color:#a0a0b8;font-size:0.95rem;margin:0;line-height:1.5;">El catálogo de esta tienda no está disponible en este momento.</p></div></div>';
             return;
         }
         if (!res.ok) {
