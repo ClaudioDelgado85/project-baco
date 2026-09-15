@@ -1,0 +1,89 @@
+/* PlatoQR — Shared Design Tokens (source of truth: DESIGN.md) */
+
+:root {
+    /* ===== Primary — Dark Red/Crimson ===== */
+    --primary: #ab2d1b;
+    --primary-hover: #8d1607;
+    --primary-container: #cd4630;
+    --on-primary: #ffffff;
+    --on-primary-container: #fffbff;
+    --primary-fixed: #ffdad4;
+    --primary-fixed-dim: #ffb4a6;
+    --on-primary-fixed: #3f0300;
+    --on-primary-fixed-variant: #8d1607;
+
+    /* ===== Secondary — Amber/Burnt Orange ===== */
+    --secondary: #aa3700;
+    --secondary-container: #ff743f;
+    --on-secondary: #ffffff;
+    --on-secondary-container: #641d00;
+    --secondary-fixed: #ffdbcf;
+    --secondary-fixed-dim: #ffb59c;
+    --on-secondary-fixed: #380c00;
+    --on-secondary-fixed-variant: #822800;
+
+    /* ===== Tertiary — Green (success states) ===== */
+    --tertiary: #006b2c;
+    --tertiary-container: #00873a;
+    --on-tertiary: #ffffff;
+    --tertiary-fixed: #7ffc97;
+    --tertiary-fixed-dim: #62df7d;
+    --on-tertiary-fixed: #002109;
+    --on-tertiary-fixed-variant: #005320;
+
+    /* ===== Surfaces — Warm Cream ===== */
+    --surface: #fff8f4;
+    --surface-dim: #e0d9d3;
+    --surface-container-lowest: #ffffff;
+    --surface-container-low: #faf2ed;
+    --surface-container: #f4ece7;
+    --surface-container-high: #eee7e1;
+    --surface-container-highest: #e9e1dc;
+    --on-surface: #1e1b18;
+    --on-surface-variant: #59413d;
+    --inverse-surface: #33302c;
+    --inverse-on-surface: #f7efea;
+    --inverse-primary: #ffb4a6;
+    --surface-variant: #e9e1dc;
+    --background: #fff8f4;
+    --on-background: #1e1b18;
+
+    /* ===== Outline ===== */
+    --outline: #8d706b;
+    --outline-variant: #e1bfb9;
+
+    /* ===== Semantic ===== */
+    --danger: #dc2626;
+    --danger-light: #fecaca;
+    --success: #006b2c;
+    --success-light: #bbf7d0;
+    --warning: #a16207;
+    --warning-light: #fefce8;
+
+    /* ===== Elevation ===== */
+    --shadow-1: 0px 2px 8px rgba(30, 27, 24, 0.05);
+    --shadow-2: 0px 8px 24px -4px rgba(224, 83, 60, 0.12), 0px 4px 12px rgba(30, 27, 24, 0.06);
+    --shadow-cta: 0 4px 14px rgba(205, 70, 48, 0.38);
+    --shadow-4: 0px 16px 36px -6px rgba(30, 27, 24, 0.16);
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-lg: 0 4px 24px rgba(0,0,0,0.08);
+
+    /* ===== Typography Scale ===== */
+    --font-display-lg: 800 36px/1.17 'Plus Jakarta Sans', 'Inter', sans-serif;
+    --font-display-md: 800 26px/1.24 'Plus Jakarta Sans', 'Inter', sans-serif;
+    --font-headline-md: 700 22px/1.28 'Plus Jakarta Sans', 'Inter', sans-serif;
+    --font-headline-sm: 600 18px/1.35 'Plus Jakarta Sans', 'Inter', sans-serif;
+    --font-body-lg: 400 18px/1.55 'Plus Jakarta Sans', 'Inter', sans-serif;
+    --font-body-md: 400 15px/1.47 'Plus Jakarta Sans', 'Inter', sans-serif;
+    --font-body-sm: 400 13px/1.4 'Plus Jakarta Sans', 'Inter', sans-serif;
+    --font-label-lg: 600 15px/1.33 'Plus Jakarta Sans', 'Inter', sans-serif;
+    --font-label-md: 600 13px/1.23 'Plus Jakarta Sans', 'Inter', sans-serif;
+    --font-label-sm: 700 11px/1.27 'Plus Jakarta Sans', 'Inter', sans-serif;
+
+    /* ===== Border Radius ===== */
+    --radius-sm: 6px;
+    --radius-md: 0.75rem;
+    --radius-lg: 1rem;
+    --radius-xl: 1.5rem;
+    --radius-full: 9999px;
+}

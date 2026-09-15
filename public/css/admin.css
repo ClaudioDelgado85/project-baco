@@ -49,7 +49,7 @@
     border-radius: var(--radius-sm);
     margin-bottom: 20px;
     display: none;
-    border: 1px solid #fecaca;
+    border: 1px solid var(--danger-light);
 }
 
 .login-error.show {
@@ -84,19 +84,19 @@
 .status-chip.active {
     background: var(--success-light);
     color: var(--success);
-    border: 1px solid #bbf7d0;
+    border: 1px solid var(--success-light);
 }
 
 .status-chip.warning {
-    background: #fefce8;
-    color: #a16207;
-    border: 1px solid #fde68a;
+    background: var(--warning-light);
+    color: var(--warning);
+    border: 1px solid var(--warning-light);
 }
 
 .status-chip.expired {
     background: var(--danger-light);
     color: var(--danger);
-    border: 1px solid #fecaca;
+    border: 1px solid var(--danger-light);
 }
 
 .status-chip.inactive {
@@ -111,7 +111,7 @@
 }
 
 .row-danger:hover td {
-    background: #fee2e2;
+    background: var(--danger-light);
 }
 
 /* ===== Stores Filter (PR3 — "Todas" / "Vencidas y por vencer") ===== */
