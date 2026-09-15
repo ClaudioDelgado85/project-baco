@@ -921,6 +921,12 @@ app.get('/api/dashboard/summary', (req, res) => {
   });
 });
 
+// Landing page (marketing) — served at root. It replaces express.static's implicit
+// index.html behavior for GET / ; /s/:slug keeps serving the store catalog via index.html.
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'landing.html'));
+});
+
 // Public store page route — must be BEFORE static middleware
 app.get('/s/:slug', (req, res) => {
   const { slug } = req.params;
