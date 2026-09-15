@@ -1241,4 +1241,72 @@ button {
         margin-inline: 2rem;
         padding: 4rem 3rem;
     }
+
+    /* ===== PROBAR GRATIS SECTION ===== */
+    .try-free-section {
+        padding-block: 3rem 1rem;
+    }
+
+    .try-free-grid {
+        display: grid;
+        gap: 2rem;
+    }
+
+    @media (min-width: 768px) {
+        .try-free-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    .try-free-desktop {
+        position: relative;
+        aspect-ratio: 650/450;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 12px 32px rgba(171,45,27,0.15);
+    }
+
+    .phone-mockup {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .phone-frame {
+        position: absolute;
+        top: 80px;
+        left: 40px;
+        right: 40px;
+        bottom: 40px;
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 2rem 1.5rem;
+        box-shadow: inset 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .try-free-desktop .eyebrow {
+        color: var(--on-surface-variant);
+    }
+
+    .try-free-desktop .section-title {
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .try-free-desktop .section-subtitle {
+        color: var(--on-surface-variant);
+        font-size: var(--font-body-sm);
+        margin-bottom: 1.25rem;
+    }
+
+    .try-free-mobile {
+        text-align: center;
+    }
+
+    .try-free-mobile .btn-cta {
+        width: 100%;
+        padding: 1rem 2rem;
+        font-size: var(--font-body-lg);
+    }
 }
