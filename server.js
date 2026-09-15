@@ -418,7 +418,7 @@ function getSubscription(store) {
     return { status: 'expired', days_remaining: 0, expires_at: expiresAt, admin_whatsapp: adminWhatsapp };
   }
   const daysRemaining = Math.ceil(msRemaining / (24 * 60 * 60 * 1000));
-  const status = daysRemaining <= 3 ? 'warning' : 'active';
+  const status = daysRemaining <= 30 ? 'warning' : 'active';
   return { status, days_remaining: daysRemaining, expires_at: expiresAt, admin_whatsapp: adminWhatsapp };
 }
 
