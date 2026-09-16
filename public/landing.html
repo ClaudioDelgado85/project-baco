@@ -135,67 +135,7 @@
             </div>
         </section>
 
-        <!-- ===== SIMULATOR ===== -->
-        <section class="section" id="demo-preview">
-            <div class="container">
-                <div class="simulator">
-                    <div class="simulator-head">
-                        <span class="eyebrow">Simulador interactivo</span>
-                        <h2 class="section-title">Probalo como lo van a ver tus clientes</h2>
-                        <p class="section-subtitle">Tocá las categorías y añadí platos: así se ve tu menú con PlatoQR.</p>
-                    </div>
-                    <div class="sim-tabs" role="tablist" aria-label="Categorías del menú">
-                        <button class="sim-tab active" type="button">🍔 Burgers</button>
-                        <button class="sim-tab" type="button">🍕 Pizzas</button>
-                        <button class="sim-tab" type="button">🥗 Saludable</button>
-                    </div>
-                    <div class="sim-dishes">
-                        <article class="dish-card">
-                            <div class="dish-img">
-                                <img src="/uploads/1783173903172-44ad8edc-03d3-4e6d-9277-7c862b283f40.webp" alt="Smash burger doble con cheddar" width="96" height="96">
-                                <span class="badge">Top</span>
-                            </div>
-                            <div class="dish-info">
-                                <div>
-                                    <h4>Smash Burger Doble</h4>
-                                    <p class="dish-desc">Doble carne 120g, cheddar fundido, salsa house y pan de papa.</p>
-                                </div>
-                                <div class="dish-foot">
-                                    <span class="dish-price">$8.500</span>
-                                    <button class="dish-add" type="button" onclick="triggerCartToast()">
-                                        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-                                        Añadir
-                                    </button>
-                                </div>
-                            </div>
-                        </article>
-                        <article class="dish-card">
-                            <div class="dish-img">
-                                <img src="/uploads/1783174174640-451c0219-51e5-47af-9cf2-b5092591bad7.webp" alt="Tabla de entradas para compartir" width="96" height="96">
-                                <span class="badge">Para compartir</span>
-                            </div>
-                            <div class="dish-info">
-                                <div>
-                                    <h4>Tabla PlatoQR</h4>
-                                    <p class="dish-desc">Entradas de la casa para dos: papas rústicas, chicken fingers y salsas.</p>
-                                </div>
-                                <div class="dish-foot">
-                                    <span class="dish-price">$6.500</span>
-                                    <button class="dish-add" type="button" onclick="triggerCartToast()">
-                                        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-                                        Añadir
-                                    </button>
-                                </div>
-                            </div>
-                        </article>
-                    </div>
-                </div>
-            </div>
-            <div class="sim-toast" id="cart-toast" role="status" aria-live="polite">
-                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 11.1V6a2 2 0 00-2-2h-3M2 6v5.1M6 2h4.9a15 15 0 0111 11V18a2 2 0 01-2 2h-4"/><path d="M2 2l20 20"/></svg>
-                <span>Plato añadido al carrito</span>
-            </div>
-        </section>
+
 
         <!-- ===== HOW IT WORKS ===== -->
         <section class="section">
@@ -350,27 +290,6 @@
         </div>
     </footer>
 
-    <script>
-        // Simulator tabs — visual-only state change
-        document.querySelectorAll('.sim-tab').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                document.querySelectorAll('.sim-tab').forEach(function (b) {
-                    b.classList.remove('active');
-                });
-                btn.classList.add('active');
-            });
-        });
 
-        // Cart toast micro-interaction
-        function triggerCartToast() {
-            var toast = document.getElementById('cart-toast');
-            if (!toast) return;
-            toast.classList.add('show');
-            clearTimeout(toast._t);
-            toast._t = setTimeout(function () {
-                toast.classList.remove('show');
-            }, 2500);
-        }
-    </script>
 </body>
 </html>

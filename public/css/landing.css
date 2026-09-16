@@ -1271,7 +1271,8 @@ button {
     .phone-wrap {
         position: relative;
         display: inline-block;
-        width: 400px;
+        width: 480px;
+        max-width: 90vw;
         margin: 0 auto 1.5rem;
     }
 
@@ -1279,19 +1280,20 @@ button {
         display: block;
         width: 100%;
         height: auto;
-        border-radius: 24px;
+        pointer-events: none;
     }
 
-    /* Iframe positioned exactly over the white screen area of pantalla.webp */
+    /* Coordenadas exactas del rectángulo blanco medidas píxel a píxel sobre pantalla.webp (616×1007px) */
     .phone-screen {
         position: absolute;
         top: 11.22%;
-        left: 8.28%;
-        width: 80.03%;
+        left: 15.58%;
+        width: 72.73%;
         height: 76.96%;
         border: none;
         border-radius: 4px;
-        background: var(--surface);
+        background: #ffffff;
+        box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.1);
     }
 
     .try-free-desktop .eyebrow {
