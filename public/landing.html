@@ -266,15 +266,16 @@
 <section class="section" id="try-free">
     <div class="container">
         <div class="try-free-grid">
-            <!-- Desktop: phone mockup with demo frame -->
+            <!-- Desktop: phone mockup with iframe demo -->
             <div class="try-free-desktop">
                 <img src="/images/pantalla.webp" alt="Celular con PlatoQR abierto" class="phone-mockup">
-                <div class="phone-frame">
-                    <span class="eyebrow">Simulador Demo</span>
-                    <h3 class="section-title">Tu menú digital en 5 minutos</h3>
-                    <p class="section-subtitle">Tocá las categorías y añadí platos: así se ve tu menú con PlatoQR.</p>
-                    <a class="btn btn-primary" href="/s/demo">Entrar al demo</a>
+                <div class="phone-frame" id="demo-iframe-container">
+                    <iframe src="" style="width:100%;height:100%;border:none;" id="demo-iframe"></iframe>
                 </div>
+                <span class="eyebrow">Simulador Demo</span>
+                <h3 class="section-title">Tu menú digital en 5 minutos</h3>
+                <p class="section-subtitle">Tocá las categorías y añadí platos: así se ve tu menú con PlatoQR.</p>
+                <a class="btn btn-primary" href="#" onclick="document.getElementById('demo-iframe').src='/s/demo'; return false;">Entrar al demo</a>
             </div>
             <!-- Mobile: CTA button -->
             <div class="try-free-mobile">
