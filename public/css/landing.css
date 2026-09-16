@@ -1241,48 +1241,57 @@ button {
         margin-inline: 2rem;
         padding: 4rem 3rem;
     }
+}
 
-    /* ===== PROBAR GRATIS SECTION ===== */
-    .try-free-section {
-        padding-block: 3rem 1rem;
-    }
+/* ===== PROBAR GRATIS SECTION — base (mobile-first) ===== */
+.try-free-grid {
+    text-align: center;
+}
 
-    .try-free-grid {
-        display: grid;
-        gap: 2rem;
-    }
+/* Mobile: only button, no phone image */
+.try-free-desktop {
+    display: none;
+}
 
-    @media (min-width: 768px) {
-        .try-free-grid {
-            grid-template-columns: 1fr 1fr;
-        }
+.try-free-mobile {
+    display: block;
+}
+
+/* ===== DESKTOP (≥768px): phone mockup with iframe ===== */
+@media (min-width: 768px) {
+    .try-free-mobile {
+        display: none;
     }
 
     .try-free-desktop {
+        display: block;
+        text-align: center;
+    }
+
+    .phone-wrap {
         position: relative;
-        aspect-ratio: 650/450;
-        border-radius: 20px;
-        overflow: hidden;
-        box-shadow: 0 12px 32px rgba(171,45,27,0.15);
+        display: inline-block;
+        width: 320px;
+        margin: 0 auto 1.5rem;
     }
 
     .phone-mockup {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
         display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 24px;
     }
 
-    .phone-frame {
+    /* Iframe positioned exactly over the white screen area of pantalla.webp */
+    .phone-screen {
         position: absolute;
-        top: 80px;
-        left: 40px;
-        right: 40px;
-        bottom: 40px;
+        top: 11.22%;
+        left: 8.28%;
+        width: 80.03%;
+        height: 76.96%;
+        border: none;
+        border-radius: 4px;
         background: var(--surface);
-        border-radius: 16px;
-        padding: 2rem 1.5rem;
-        box-shadow: inset 0 4px 12px rgba(0,0,0,0.08);
     }
 
     .try-free-desktop .eyebrow {
@@ -1300,13 +1309,21 @@ button {
         margin-bottom: 1.25rem;
     }
 
-    .try-free-mobile {
-        text-align: center;
+    .btn-enter-demo {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.875rem 2rem;
+        background: linear-gradient(135deg, var(--primary-container), var(--secondary-container));
+        color: var(--on-primary);
+        font: var(--font-label-lg);
+        border-radius: 999px;
+        text-decoration: none;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
 
-    .try-free-mobile .btn-cta {
-        width: 100%;
-        padding: 1rem 2rem;
-        font-size: var(--font-body-lg);
+    .btn-enter-demo:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-cta);
     }
 }
