@@ -20,7 +20,7 @@
                 <img src="/images/platoqr-logo.webp" alt="PlatoQR" width="40" height="40">
                 <span>PlatoQR</span>
             </a>
-            <a class="nav-cta" href="/signup">Empezar gratis</a>
+            <a class="nav-login" href="/login">Iniciar sesión</a>
         </div>
     </header>
 
@@ -38,10 +38,10 @@
                     <p class="hero-subtitle">Digitalizá tu menú en minutos: QR dinámico, 10 temas visuales, fotos de tus platos y pedidos directos por WhatsApp. Sin comisiones.</p>
                     <div class="hero-cta-group">
                         <a class="btn btn-primary" href="/signup">
-                            Empezar gratis 14 días
+                            Crear mi menú gratis
                             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                         </a>
-                        <a class="btn btn-secondary" href="/s/demo">
+                        <a class="btn btn-secondary" href="#try-free">
                             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>
                             Ver menú demo en vivo
                         </a>
@@ -192,7 +192,7 @@
                             <li><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg> Panel de administración completo</li>
                         </ul>
                         <div class="pricing-actions">
-                            <a class="btn btn-primary" href="/signup">Empezar gratis</a>
+                            <a class="btn btn-primary" href="/signup">Probar 14 días gratis</a>
                             <!-- TODO: replace with the real WhatsApp number -->
                             <a class="btn btn-whatsapp" href="https://wa.me/" target="_blank" rel="noopener noreferrer">¿Dudas? Hablanos por WhatsApp</a>
                         </div>
@@ -214,12 +214,8 @@
                 <p class="section-subtitle" style="margin-bottom:1.5rem">Así se ve tu menú con PlatoQR — dentro del celular.</p>
                 <div class="phone-wrap">
                     <img src="/images/pantalla.webp" alt="Celular con PlatoQR abierto" class="phone-mockup">
-                    <iframe class="phone-screen" src="" id="demo-iframe"></iframe>
+                    <iframe class="phone-screen" src="/s/demo" id="demo-iframe" loading="lazy"></iframe>
                 </div>
-                <a class="btn-enter-demo" href="#" onclick="document.getElementById('demo-iframe').src='/s/demo'; this.style.display='none'; return false;">
-                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    Entrar al demo
-                </a>
             </div>
 
             <!-- Mobile: direct redirect button -->
@@ -235,24 +231,14 @@
     </div>
 </section>
 
-<!-- ===== FINAL CTA ===== -->
-<section class="section">
-</section>
-
         <!-- ===== FINAL CTA ===== -->
         <section class="section">
             <div class="container">
                 <div class="final-cta">
-                    <div class="final-cta-icon">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2v3M17 2v3M3 9h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2zM8 14h.01M12 14h.01M16 14h.01M8 18h.01M16 18h.01"/></svg>
-                    </div>
+                    <img src="/images/platoqr-logo.webp" alt="PlatoQR" class="final-cta-logo" width="64" height="64">
                     <h2>Modernizá tu menú hoy mismo</h2>
                     <p>Empezá tu prueba gratis de 14 días y tenés tu menú digital con QR funcionando en minutos.</p>
                     <div class="final-cta-actions">
-                        <a class="btn btn-primary" href="/signup">
-                            Empezar 14 días gratis
-                            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                        </a>
                         <!-- TODO: replace with the real WhatsApp number -->
                         <a class="btn btn-whatsapp" href="https://wa.me/" target="_blank" rel="noopener noreferrer">
                             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 01-9 8.4 8.5 8.5 0 01-3.4-.7L3 21l1.8-5.6a8.38 8.38 0 01-.8-3.9 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 7.7v2.8z"/></svg>

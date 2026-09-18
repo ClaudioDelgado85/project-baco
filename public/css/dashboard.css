@@ -36,10 +36,14 @@ body {
 }
 
 .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     font-size: 18px;
     font-weight: 800;
     color: var(--text);
     letter-spacing: -0.3px;
+    text-decoration: none;
 }
 
 .topbar-nav {
@@ -657,15 +661,18 @@ tr:hover {
 
 /* ---- Base: < 640px (mobile) ---- */
 .topbar {
-    padding: 0 12px;
+    padding: 10px 14px;
     height: auto;
-    min-height: 48px;
+    min-height: 52px;
+    display: flex;
     flex-wrap: wrap;
-    gap: 4px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
 }
 
 .topbar-brand {
-    font-size: 14px;
+    font-size: 15px;
     flex-shrink: 0;
 }
 
@@ -673,26 +680,39 @@ tr:hover {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    flex: 1;
-    gap: 2px;
+    display: flex;
+    gap: 4px;
     order: 3;
     width: 100%;
-    padding: 2px 0;
+    padding: 4px;
+    background: var(--surface-container-high);
+    border-radius: 10px;
 }
 
 .topbar-nav::-webkit-scrollbar { display: none; }
 
 .topbar-nav button {
-    padding: 5px 8px;
-    font-size: 11px;
+    flex: 1;
+    text-align: center;
+    padding: 7px 10px;
+    font-size: 12.5px;
+    font-weight: 600;
     white-space: nowrap;
+    border-radius: 8px;
 }
 
-.topbar-right { gap: 6px; }
+.topbar-nav button.active {
+    background: var(--surface-container-lowest);
+    color: var(--primary);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.topbar-right { gap: 8px; }
 
 .topbar-right .logout-btn {
-    padding: 5px 8px;
-    font-size: 11px;
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 8px;
 }
 
 .main-content {

@@ -107,7 +107,7 @@ db.serialize(() => {
   db.run(`INSERT OR IGNORE INTO users (id, email, password_hash, tier) VALUES (999, 'demo@mi-tienda.com', '$2a$10$demohashdemohashdemohashdemohashdemohashdemohashdemo', 'standard')`);
 
   db.run(`INSERT OR IGNORE INTO stores (id, user_id, slug, name, address, whatsapp_number, instagram_url, delivery_fee)
-    VALUES (999, 999, 'mi-tienda', 'Mi Tienda Demo', 'Av. Corrientes 1234, CABA', '5491124091027', 'https://instagram.com/yamenu.online', 500)`);
+    VALUES (999, 999, 'mi-tienda', 'Mi Tienda Demo', 'Av. Corrientes 1234, CABA', '5491124091027', 'https://instagram.com/platoqr.online', 500)`);
 
   db.run(`INSERT OR IGNORE INTO categories (id, store_id, name, order_index) VALUES (1, 999, 'Burgers', 0)`);
   db.run(`INSERT OR IGNORE INTO categories (id, store_id, name, order_index) VALUES (2, 999, 'Bebidas', 1)`);

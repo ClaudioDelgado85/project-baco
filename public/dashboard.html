@@ -3,16 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de tienda — YaMenu</title>
+    <title>Panel de tienda — PlatoQR</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="icon" type="image/webp" href="/images/platoqr-logo.webp">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
     <!-- Top Navigation Bar -->
     <header class="topbar">
-        <div class="topbar-brand">YaMenu · Panel</div>
+        <a class="topbar-brand" href="/dashboard" style="text-decoration:none; color:inherit;">
+            <img src="/images/platoqr-logo.webp" alt="PlatoQR" width="30" height="30" style="border-radius:8px;">
+            <span>PlatoQR <span style="font-size:13px; font-weight:600; color:var(--text-muted); opacity:0.85;">· Panel</span></span>
+        </a>
         <nav class="topbar-nav">
             <button data-tab="products" class="active" onclick="switchTab('products')">Productos</button>
             <button data-tab="categories" onclick="switchTab('categories')">Categorías</button>

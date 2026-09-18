@@ -3,18 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Admin — YaMenu</title>
+    <title>Panel Admin — PlatoQR</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/dashboard.css">
     <link rel="stylesheet" href="/css/admin.css">
+    <link rel="icon" type="image/webp" href="/images/platoqr-logo.webp">
 </head>
 <body>
     <!-- Inline login (shown when there is no admin session; hidden once authenticated) -->
     <div id="adminLogin" class="admin-login" style="display:none;">
         <div class="login-card">
             <div class="login-logo">
-                <h1>Panel Admin</h1>
+                <img src="/images/platoqr-logo.webp" alt="PlatoQR" width="56" height="56" style="border-radius:12px; margin-bottom:12px; box-shadow:0 3px 12px rgba(0,0,0,0.08);">
+                <h1>Panel Admin · PlatoQR</h1>
                 <p>Iniciá sesión con tu cuenta de administrador</p>
             </div>
 
@@ -23,7 +25,7 @@
             <form id="adminLoginForm" novalidate>
                 <div class="form-group">
                     <label for="adminEmail">Email</label>
-                    <input type="email" id="adminEmail" placeholder="admin@yamenu.com" autocomplete="email" required>
+                    <input type="email" id="adminEmail" placeholder="admin@platoqr.com" autocomplete="email" required>
                 </div>
 
                 <div class="form-group">
@@ -39,7 +41,10 @@
     <!-- Admin panel (shown only with a valid admin session) -->
     <div id="adminPanel" style="display:none;">
         <header class="topbar">
-            <div class="topbar-brand">YaMenu · Panel Admin</div>
+            <div class="topbar-brand">
+                <img src="/images/platoqr-logo.webp" alt="PlatoQR" width="28" height="28" style="border-radius:6px;">
+                <span>PlatoQR · Panel Admin</span>
+            </div>
             <nav class="topbar-nav">
             </nav>
             <div class="topbar-right">
