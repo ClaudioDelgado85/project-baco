@@ -8,3 +8,9 @@ public/uploads/*
 !public/uploads/.gitkeep
 *.stackdump
 .codegraph/
+
+# Brag video artifacts (generated, reproducible)
+brag-output-*/
+renders/
+composition/
+capture-assets.js
